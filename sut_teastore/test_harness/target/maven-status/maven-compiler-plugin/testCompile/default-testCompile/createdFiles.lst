@@ -6,7 +6,10 @@ com\example\TeaStore_ModelC_Self_RobustnessTest.class
 com\example\TeaStore_ModelE_ZeroShot_v2_RobustnessTest.class
 com\example\TeaStore_ModelD_ZeroShot_v2_RobustnessTest.class
 com\example\TeaStore_ModelD_CoT_v2_RobustnessTest.class
+com\example\TeaStore_ModelE_GuidedFewShot_RobustnessTest.class
 com\example\TeaStore_ModelE_Self_RobustnessTest.class
+com\example\TeaStore_ModelC_GuidedFewShot_RobustnessTest.class
+com\example\TeaStore_ModelD_GuidedFewShot_RobustnessTest.class
 com\example\TeaStoreBaseTest.class
 com\example\TeaStore_ModelE_Guided_RobustnessTest.class
 com\example\TeaStore_ModelE_CoT_v2_RobustnessTest.class

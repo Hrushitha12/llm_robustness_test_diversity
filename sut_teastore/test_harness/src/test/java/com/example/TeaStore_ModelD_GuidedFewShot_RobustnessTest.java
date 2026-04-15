@@ -1,4 +1,3 @@
-```java
 package com.example;
 
 import java.net.http.HttpResponse;
@@ -135,5 +134,3 @@ public class TeaStore_ModelD_GuidedFewShot_RobustnessTest extends TeaStoreBaseTe
         assertNoServerError(r);
     }
 }
-```
-
