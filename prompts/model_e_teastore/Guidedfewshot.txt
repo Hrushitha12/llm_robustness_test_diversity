@@ -1,0 +1,148 @@
+You are a software tester writing JUnit 5 robustness tests in Java 17.
+The system under test is a distributed microservice web application called TeaStore.
+It is deployed via Docker Compose and exposed at http://localhost:8080.
+All requests go through the WebUI service.
+
+Available endpoints:
+
+GET  /tools.descartes.teastore.webui/
+GET  /tools.descartes.teastore.webui/category?id=<integer>
+GET  /tools.descartes.teastore.webui/product?id=<integer>
+GET  /tools.descartes.teastore.webui/cart
+GET  /tools.descartes.teastore.webui/profile
+POST /tools.descartes.teastore.webui/loginAction       body: username=<string>&password=<string>
+POST /tools.descartes.teastore.webui/cartAction        body: addToCart=&productid=<integer>
+POST /tools.descartes.teastore.webui/cartAction        body: removeProduct=&productid=<integer>
+POST /tools.descartes.teastore.webui/order             body: confirm=
+
+Robustness oracle:
+The system passes a robustness test if the HTTP response status code is less than 500.
+A 2xx, 3xx, or 4xx response means the system handled the input gracefully.
+A 5xx response is a robustness failure.
+
+Your test class must extend TeaStoreBaseTest which provides:
+  HttpResponse<String> get(String path) throws Exception
+  HttpResponse<String> post(String path, String body) throws Exception
+  void assertNoServerError(HttpResponse<?> response)
+
+Robustness testing background:
+Robustness testing evaluates system behavior in the presence of erroneous input
+conditions. The goal is to stimulate internal errors by applying systematically
+mutated input values to the parameters of each service call. The robustness of
+the system is then classified according to the failure modes observed.
+
+The following mutation rules define the categories of invalid inputs that should
+be systematically applied to each parameter based on its data type:
+
+String parameter mutations:
+  - Replace by null value
+  - Replace by empty string
+  - Replace by a predefined string (a fixed known string unrelated to the parameter)
+  - Replace by string with nonprintable characters
+  - Add nonprintable characters to the string
+  - Replace by alphanumeric string (where a specific format is expected)
+  - Add characters to overflow the maximum expected size
+
+Number parameter mutations:
+  - Replace by null value
+  - Replace by empty value (omit the parameter value)
+  - Replace by -1
+  - Replace by 1
+  - Replace by 0
+  - Add one to a valid value
+  - Subtract one from a valid value
+  - Replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+  - Replace by the minimum number valid for the type (e.g., Integer.MIN_VALUE)
+  - Replace by the maximum valid value plus one (overflow)
+  - Replace by the minimum valid value minus one (underflow)
+
+In addition to mutating parameter values, robustness tests should also consider
+structural mutations to the request itself:
+  - Omitting a required parameter key entirely from the request
+  - Sending a request with no body at all
+  - Sending a parameter with only its key and no value
+
+Failure classification follows the CRASH scale:
+  - Catastrophic: server crashes or reboots
+  - Restart: service hangs and must be forcefully terminated
+  - Abort: abnormal termination, such as an unexpected HTTP 500 response
+  - Silent: no error indicated on an operation that cannot be performed
+  - Hindering: incorrect error code or delayed response
+In this study, we detect Abort-class failures (HTTP status >= 500).
+
+Examples of robustness tests applying these mutation rules to TeaStore:
+
+@Test
+void test_R1_category_nullId() throws Exception {
+    // Number mutation: replace by null value (omit the parameter key entirely)
+    HttpResponse<String> r = get("/tools.descartes.teastore.webui/category");
+    assertNoServerError(r);
+}
+
+@Test
+void test_R1_category_negativeOneId() throws Exception {
+    // Number mutation: replace by -1
+    HttpResponse<String> r = get("/tools.descartes.teastore.webui/category?id=-1");
+    assertNoServerError(r);
+}
+
+@Test
+void test_R1_product_emptyId() throws Exception {
+    // Number mutation: replace by empty value
+    HttpResponse<String> r = get("/tools.descartes.teastore.webui/product?id=");
+    assertNoServerError(r);
+}
+
+@Test
+void test_R1_login_nonprintableUsername() throws Exception {
+    // String mutation: replace by string with nonprintable characters
+    HttpResponse<String> r = post("/tools.descartes.teastore.webui/loginAction",
+        "username=\u0000\u0001\u0002&password=test");
+    assertNoServerError(r);
+}
+
+@Test
+void test_R1_cartAdd_keyAbsentProductId() throws Exception {
+    // Structural mutation: omit required parameter key entirely
+    HttpResponse<String> r = post("/tools.descartes.teastore.webui/cartAction",
+        "addToCart=");
+    assertNoServerError(r);
+}
+
+@Test
+void test_R1_cartRemove_emptyProductId() throws Exception {
+    // Number mutation: replace by empty value
+    HttpResponse<String> r = post("/tools.descartes.teastore.webui/cartAction",
+        "removeProduct=&productid=");
+    assertNoServerError(r);
+}
+
+@Test
+void test_R1_login_overflowUsername() throws Exception {
+    // String mutation: add characters to overflow max size
+    String longStr = "A".repeat(5000);
+    HttpResponse<String> r = post("/tools.descartes.teastore.webui/loginAction",
+        "username=" + longStr + "&password=test");
+    assertNoServerError(r);
+}
+
+Notice: each test applies exactly one mutation rule from the taxonomy above to one
+parameter of one endpoint. The comment above each test identifies which mutation
+rule is being applied. Key-absent (omitting the parameter key entirely) and
+value-empty (key present but value is empty string) are structurally different
+mutations and must be tested separately.
+
+Following the same style as the examples above, write a JUnit 5 test class that
+systematically applies the mutation rules to the parameters of the TeaStore
+endpoints. Cover as many different endpoints, parameters, and mutation categories
+as possible. Do not repeat the same mutation on the same parameter twice.
+
+Package: com.example
+Class name: TeaStore_ModelE_GuidedFewShot_RobustnessTest
+Each test method must have a unique name starting with test_R1_
+Each test method must declare throws Exception in its signature
+Each test must call get() or post() with a robustness input and then call assertNoServerError()
+Do not use assertThrows
+Do not use try-catch blocks
+Import only from java.net.http and org.junit.jupiter.api
+Output only the Java class, no explanation.
