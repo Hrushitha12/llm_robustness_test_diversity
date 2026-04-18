@@ -1,0 +1,184 @@
+You are a software tester writing JUnit 5 robustness tests in Java 17.
+The system under test is the OpenTelemetry Astronomy Shop, a distributed
+microservice e-commerce web application deployed via Docker Compose and
+exposed at http://localhost:8080.
+
+All requests are sent to the frontend proxy. POST bodies are JSON.
+GET requests pass parameters as query strings or path segments.
+
+Available endpoints:
+
+GET  /api/products                                   — list all products
+GET  /api/products/{productId}                       — get product by ID (known valid ID: "OLJCESPC7Z")
+GET  /api/cart?sessionId=<string>                    — get cart for session
+POST /api/cart                                       — add item to cart
+     body: {"userId":"<string>","item":{"productId":"<string>","quantity":<integer>}}
+DELETE /api/cart?sessionId=<string>                  — empty cart for session
+POST /api/checkout                                   — place an order
+     body: {"userId":"<string>","userCurrency":"<string>",
+            "address":{"streetAddress":"<string>","state":"<string>",
+                        "country":"<string>","city":"<string>","zipCode":"<string>"},
+            "email":"<string>",
+            "creditCard":{"creditCardNumber":"<string>","creditCardCvv":<integer>,
+                           "creditCardExpirationYear":<integer>,"creditCardExpirationMonth":<integer>}}
+POST /api/currency                                   — convert currency
+     body: {"from":{"currencyCode":"<string>","units":<integer>,"nanos":<integer>},"toCode":"<string>"}
+POST /api/shipping                                   — calculate shipping cost
+     body: {"address":{"streetAddress":"<string>","state":"<string>",
+                        "country":"<string>","city":"<string>","zipCode":"<string>"},
+            "items":[{"productId":"<string>","quantity":<integer>}]}
+GET  /api/recommendations?productIds=<string>&sessionId=<string>&currencyCode=<string>
+GET  /api/ads?contextKeys=<string>
+
+Robustness oracle:
+The system passes a robustness test if the HTTP response status code is less than 500.
+A 2xx, 3xx, or 4xx response means the system handled the input gracefully.
+A 5xx response is a robustness failure.
+
+Your test class must extend OTelShopBaseTest which provides:
+  HttpResponse<String> get(String path) throws Exception
+  HttpResponse<String> postJson(String path, String jsonBody) throws Exception
+  HttpResponse<String> delete(String path) throws Exception
+  void assertNoServerError(HttpResponse<?> response)
+
+The postJson() method automatically sets Content-Type: application/json.
+
+Robustness testing background:
+Robustness testing evaluates system behavior in the presence of erroneous input
+conditions. The goal is to stimulate internal errors by applying systematically
+mutated input values to the parameters of each service call. The robustness of
+the system is then classified according to the failure modes observed.
+
+The following mutation rules define the categories of invalid inputs that should
+be systematically applied to each parameter based on its data type:
+
+String parameter mutations:
+  - Replace by null value
+  - Replace by empty string
+  - Replace by a predefined string (a fixed known string unrelated to the parameter)
+  - Replace by string with nonprintable characters
+  - Add nonprintable characters to the string
+  - Replace by alphanumeric string (where a specific format is expected)
+  - Add characters to overflow the maximum expected size
+
+Number parameter mutations:
+  - Replace by null value
+  - Replace by empty value (omit the parameter value)
+  - Replace by -1
+  - Replace by 1
+  - Replace by 0
+  - Add one to a valid value
+  - Subtract one from a valid value
+  - Replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+  - Replace by the minimum number valid for the type (e.g., Integer.MIN_VALUE)
+  - Replace by the maximum valid value plus one (overflow)
+  - Replace by the minimum valid value minus one (underflow)
+
+List parameter mutations:
+  - Replace by null value
+  - Remove all elements from the list (empty list)
+  - Remove all elements except the first one
+  - Add a duplicate element to the list
+  - Add an element with invalid values to the list
+
+In addition to mutating parameter values, robustness tests should also consider
+structural mutations to the JSON request body:
+  - Omitting a required field entirely from the JSON object
+  - Sending a field with a null value where an object is expected
+  - Sending an empty JSON object {} where a populated object is expected
+  - Sending a nested object with all fields as empty strings
+
+Failure classification follows the CRASH scale:
+  - Catastrophic: server crashes or reboots
+  - Restart: service hangs and must be forcefully terminated
+  - Abort: abnormal termination, such as an unexpected HTTP 500 response
+  - Silent: no error indicated on an operation that cannot be performed
+  - Hindering: incorrect error code or delayed response
+In this study, we detect Abort-class failures (HTTP status >= 500).
+
+Examples of robustness tests applying these mutation rules to OTel endpoints:
+
+@Test
+public void test_R1_ProductEmptyId() throws Exception {
+    // String mutation: replace by empty string
+    HttpResponse<String> response = get("/api/products/");
+    assertNoServerError(response);
+}
+
+@Test
+public void test_R1_CartMissingSessionId() throws Exception {
+    // Structural mutation: omit required parameter entirely
+    HttpResponse<String> response = get("/api/cart");
+    assertNoServerError(response);
+}
+
+@Test
+public void test_R1_CartAddFieldAbsentItem() throws Exception {
+    // Structural mutation: omit required field from JSON body
+    String body = "{\"userId\":\"user-1\"}";
+    HttpResponse<String> response = postJson("/api/cart", body);
+    assertNoServerError(response);
+}
+
+@Test
+public void test_R1_CartAddNullItem() throws Exception {
+    // Structural mutation: send null where object is expected
+    String body = "{\"userId\":\"user-1\",\"item\":null}";
+    HttpResponse<String> response = postJson("/api/cart", body);
+    assertNoServerError(response);
+}
+
+@Test
+public void test_R1_CartAddEmptyProductId() throws Exception {
+    // String mutation: replace by empty string
+    String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+    HttpResponse<String> response = postJson("/api/cart", body);
+    assertNoServerError(response);
+}
+
+@Test
+public void test_R1_CurrencyNegativeUnits() throws Exception {
+    // Number mutation: replace by -1
+    String body = "{\"from\":{\"currencyCode\":\"USD\",\"units\":-1,\"nanos\":0},\"toCode\":\"EUR\"}";
+    HttpResponse<String> response = postJson("/api/currency", body);
+    assertNoServerError(response);
+}
+
+@Test
+public void test_R1_ShippingEmptyItemsList() throws Exception {
+    // List mutation: remove all elements from the list
+    String body = "{\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+        + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"items\":[]}";
+    HttpResponse<String> response = postJson("/api/shipping", body);
+    assertNoServerError(response);
+}
+
+@Test
+public void test_R1_CheckoutEmptyBody() throws Exception {
+    // Structural mutation: send empty JSON object
+    String body = "{}";
+    HttpResponse<String> response = postJson("/api/checkout", body);
+    assertNoServerError(response);
+}
+
+Notice: each test applies exactly one mutation rule from the taxonomy above to one
+parameter of one endpoint. The comment identifies which mutation rule is being
+applied. Field-absent (omitting a key from JSON), field-null (key present with
+null value), and field-empty (key present with empty string) are structurally
+different mutations and must be tested separately.
+
+Following the same style as the examples above, write a JUnit 5 test class that
+systematically applies the mutation rules to the parameters of the OTel Astronomy
+Shop endpoints. Cover as many different endpoints, parameters, and mutation
+categories as possible. Do not repeat the same mutation on the same parameter twice.
+
+Package: com.example
+Class name: OTelShop_ModelC_GuidedFewShot_RobustnessTest
+Each test method must declare throws Exception in its signature.
+Each test method must have a unique descriptive name starting with test_R1_
+Each test must call get(), postJson(), or delete() with a robustness input and then call assertNoServerError()
+Do not use assertThrows.
+Do not assert on specific exception types or return values.
+Do not use try-catch blocks.
+Import only from java.net.http and org.junit.jupiter.api
+Output only the Java class, no explanation.
