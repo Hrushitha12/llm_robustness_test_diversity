@@ -9,89 +9,97 @@ public class OTelShop_ModelC_GuidedFewShot_RobustnessTest extends OTelShopBaseTe
     @Test
     public void test_R1_ProductNullId() throws Exception {
         // String mutation: replace by null value
-        HttpResponse<String> response = get("/api/products/%7B%7D");
+        HttpResponse<String> response = get("/api/products/");
         assertNoServerError(response);
     }
 
     @Test
-    public void test_R1_CartInvalidSessionId() throws Exception {
+    public void test_R1_CartAddFieldAbsentUserId() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddInvalidUserId() throws Exception {
         // String mutation: replace by predefined string
-        HttpResponse<String> response = get("/api/cart?sessionId=invalid-session-id");
-        assertNoServerError(response);
-    }
-
-    @Test
-    public void test_R1_AddToCartNegativeQuantity() throws Exception {
-        // Number mutation: replace by -1
-        String body = "{\"userId\":\"user-2\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        String body = "{\"userId\":\"invalid_user\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2}}";
         HttpResponse<String> response = postJson("/api/cart", body);
         assertNoServerError(response);
     }
 
     @Test
-    public void test_R1_AddToCartMaxQuantity() throws Exception {
-        // Number mutation: replace by maximum valid value for integer type
-        String body = "{\"userId\":\"user-2\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":Integer.MAX_VALUE}}";
+    public void test_R1_CartAddLargeProductId() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String productId = "A".repeat(256); // Assuming max length of 255 for productId
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"" + productId + "\",\"quantity\":2}}";
         HttpResponse<String> response = postJson("/api/cart", body);
         assertNoServerError(response);
     }
 
     @Test
-    public void test_R1_EmptyCart() throws Exception {
-        // List mutation: remove all elements from the list
-        HttpResponse<String> response = delete("/api/cart?sessionId=");
-        assertNoServerError(response);
-    }
-
-    @Test
-    public void test_R1_CheckoutMissingUserId() throws Exception {
-        // Structural mutation: omit required field entirely
-        String body = "{\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
-                + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"john.doe@example.com\","
-                + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
-                + "\"creditCardExpirationYear\":2024,\"creditCardExpirationMonth\":1}}";
-        HttpResponse<String> response = postJson("/api/checkout", body);
-        assertNoServerError(response);
-    }
-
-    @Test
-    public void test_R1_CheckoutEmptyAddress() throws Exception {
-        // Structural mutation: send empty JSON object for required field
-        String body = "{\"userId\":\"user-3\",\"address\":{},\"userCurrency\":\"USD\",\"email\":\"john.doe@example.com\","
-                + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
-                + "\"creditCardExpirationYear\":2024,\"creditCardExpirationMonth\":1}}";
-        HttpResponse<String> response = postJson("/api/checkout", body);
-        assertNoServerError(response);
-    }
-
-    @Test
-    public void test_R1_CurrencyConversionMaxUnits() throws Exception {
-        // Number mutation: replace by maximum valid value for integer type
-        String body = "{\"from\":{\"currencyCode\":\"USD\",\"units\":Integer.MAX_VALUE,\"nanos\":0},\"toCode\":\"EUR\"}";
-        HttpResponse<String> response = postJson("/api/currency", body);
-        assertNoServerError(response);
-    }
-
-    @Test
-    public void test_R1_CurrencyConversionZeroUnits() throws Exception {
+    public void test_R1_CartAddZeroQuantity() throws Exception {
         // Number mutation: replace by 0
-        String body = "{\"from\":{\"currencyCode\":\"USD\",\"units\":0,\"nanos\":0},\"toCode\":\"EUR\"}";
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+ void test_R1_CartAddNegativeQuantity() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-2}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddEmptyAddress() throws Exception {
+        // Structural mutation: send empty JSON object where populated object is expected
+        String body = "{\"userId\":\"user-1\",\"address\":{}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddInvalidCreditCardNumber() throws Exception {
+        // String mutation: replace by predefined string with nonprintable characters
+        String body = "{\"userId\":\"user-1\",\"creditCard\":{\"creditCardNumber\":\"\\x01\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":9}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+ public void test_R1_CurrencyAddNonPrintableCharacters() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String currencyCode = "USD\x07";
+        String body = "{\"from\":{\"currencyCode\":\"" + currencyCode + "\",\"units\":5,\"nanos\":500},\"toCode\":\"EUR\"}";
         HttpResponse<String> response = postJson("/api/currency", body);
         assertNoServerError(response);
     }
 
     @Test
-    public void test_R1_ShippingAddressNull() throws Exception {
-        // Structural mutation: send null where object is expected
-        String body = "{\"address\":null,\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":2}]}";
+ public void test_R1_ShippingAddInvalidAddress() throws Exception {
+        // Structural mutation: send field with invalid values in the list
+        String body = "{\"address\":{\"streetAddress\":\"invalid\",\"state\":\"invalid\",\"country\":\"invalid\",\"city\":\"invalid\",\"zipCode\":\"invalid\"},\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":2}]}";
         HttpResponse<String> response = postJson("/api/shipping", body);
         assertNoServerError(response);
     }
 
     @Test
-    public void test_R1_RecommendationsMissingProductId() throws Exception {
-        // Structural mutation: omit required parameter entirely
-        HttpResponse<String> response = get("/api/recommendations?sessionId=test");
+ public void test_R1_RecommendationsEmptyProductIds() throws Exception {
+        // List mutation: remove all elements from the list (empty list)
+        String url = "/api/recommendations?productIds=&sessionId=abc&currencyCode=USD";
+        HttpResponse<String> response = get(url);
+        assertNoServerError(response);
+    }
+
+    @Test
+ public void test_R1_AdsNullContextKeys() throws Exception {
+        // Structural mutation: send field with null value where string is expected
+        String url = "/api/ads?contextKeys=";
+        HttpResponse<String> response = get(url);
         assertNoServerError(response);
     }
 }

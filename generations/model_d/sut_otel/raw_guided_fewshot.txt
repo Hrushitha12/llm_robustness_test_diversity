@@ -4,5 +4,2648 @@ package com.example;
 import java.net.http.HttpResponse;
 import org.junit.jupiter.api.Test;
 
-public class OTelShop_ModelD_GuidedFewShot_RobustnessTest extends OT
+public class OTelShop_ModelD_GuidedFewShot_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_ProductsInvalidPath() throws Exception {
+        // String mutation: replace by non-printable characters
+        HttpResponse<String> response = get("/api/products/\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductByIdNullId() throws Exception {
+        // String mutation: replace by null value (using empty string as proxy)
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductByIdEmptyId() throws Exception {
+        // String mutation: replace by empty string
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductByIdNonPrintableId() throws Exception {
+        // String mutation: replace by non-printable characters
+        HttpResponse<String> response = get("/api/products/\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_GetCartNullSessionId() throws Exception {
+        // Structural mutation: omit required parameter entirely
+        HttpResponse<String> response = get("/api/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_GetCartEmptySessionId() throws Exception {
+        // String mutation: replace by empty string
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_GetCartNonPrintableSessionId() throws Exception {
+        // String mutation: replace by non-printable characters
+        HttpResponse<String> response = get("/api/cart?sessionId=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNullUserId() throws Exception {
+        // Structural mutation: send null where string is expected (using empty string as proxy)
+        String body = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddEmptyUserId() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNonPrintableUserId() throws Exception {
+        // String mutation: replace by non-printable characters
+        String body = "{\"userId\":\"\\u0000\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddItemNullProductId() throws Exception {
+        // Structural mutation: send null where string is expected (using empty string as proxy)
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddItemEmptyProductId() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddItemNonPrintableProductId() throws Exception {
+        // String mutation: replace by non-printable characters
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"\\u0000\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddItemNegativeQuantity() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddItemZeroQuantity() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddItemOverflowQuantity() throws Exception {
+        // Number mutation: replace by the maximum number valid for the type plus one (overflow)
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2147483648}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_EmptyCartNullSessionId() throws Exception {
+        // Structural mutation: omit required parameter entirely
+        HttpResponse<String> response = delete("/api/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_EmptyCartEmptySessionId() throws Exception {
+        // String mutation: replace by empty string
+        HttpResponse<String> response = delete("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_EmptyCartNonPrintableSessionId() throws Exception {
+        // String mutation: replace by non-printable characters
+        HttpResponse<String> response = delete("/api/cart?sessionId=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullUserId() throws Exception {
+        // Structural mutation: send null where string is expected (using empty string as proxy)
+        String body = "{\"userId\":\"\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyUserId() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonPrintableUserId() throws Exception {
+        // String mutation: replace by non-printable characters
+        String body = "{\"userId\":\"\\u0000\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullUserCurrency() throws Exception {
+        // Structural mutation: send null where string is expected (using empty string as proxy)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyUserCurrency() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonPrintableUserCurrency() throws Exception {
+        // String mutation: replace by non-printable characters
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"\\u0000\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAddressNullStreetAddress() throws Exception {
+        // Structural mutation: send null where string is expected (using empty string as proxy)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAddressEmptyStreetAddress() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAddressNonPrintableStreetAddress() throws Exception {
+        // String mutation: replace by non-printable characters
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"\\u0000\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmailNull() throws Exception {
+        // Structural mutation: send null where string is expected (using empty string as proxy)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmailEmpty() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmailNonPrintable() throws Exception {
+        // String mutation: replace by non-printable characters
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"\\u0000\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNullNumber() throws Exception {
+        // Structural mutation: send null where string is expected (using empty string as proxy)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardEmptyNumber() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonPrintableNumber() throws Exception {
+        // String mutation: replace by non-printable characters
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"\\u0000\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeCvv() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":-1,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardZeroCvv() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":0,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeYear() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":-1,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeMonth() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":-1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooHighCvv() throws Exception {
+        // Number mutation: replace by 9999 (too high)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":9999,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooHighYear() throws Exception {
+        // Number mutation: replace by 9999 (too high)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":9999,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooHighMonth() throws Exception {
+        // Number mutation: replace by 13 (too high)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":13}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeNumber() throws Exception {
+        // Number mutation: replace by negative number (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"-1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardInvalidNumber() throws Exception {
+        // Number mutation: replace by invalid number (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123457\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericNumber() throws Exception {
+        // Number mutation: replace by non-numeric string (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"abcdefg\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericCvv() throws Exception {
+        // Number mutation: replace by non-numeric string (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":\"abcdefg\","
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericYear() throws Exception {
+        // Number mutation: replace by non-numeric string (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":\"abcdefg\",\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericMonth() throws Exception {
+        // Number mutation: replace by non-numeric string (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":\"abcdefg\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumber() throws Exception {
+        // Number mutation: replace by too long number (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumber() throws Exception {
+        // Number mutation: replace by too short number (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongCvv() throws Exception {
+        // Number mutation: replace by too long cvv (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortCvv() throws Exception {
+        // Number mutation: replace by too short cvv (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongYear() throws Exception {
+        // Number mutation: replace by too long year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":12345,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortYear() throws Exception {
+        // Number mutation: replace by too short year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":1,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongMonth() throws Exception {
+        // Number mutation: replace by too long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortMonth() throws Exception {
+        // Number mutation: replace by too short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":0}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongAll() throws Exception {
+        // Number mutation: replace by too long values (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":12345,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortAll() throws Exception {
+        // Number mutation: replace by too short values (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":1,\"creditCardExpirationMonth\":0}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardInvalidAll() throws Exception {
+        // Number mutation: replace by invalid values (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"abcdefg\",\"creditCardCvv\":\"abcdefg\","
+            + "\"creditCardExpirationYear\":\"abcdefg\",\"creditCardExpirationMonth\":\"abcdefg\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeAll() throws Exception {
+        // Number mutation: replace by negative values (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"-1234567890123456\",\"creditCardCvv\":-123,"
+            + "\"creditCardExpirationYear\":-1234,\"creditCardExpirationMonth\":-12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericAll() throws Exception {
+        // Number mutation: replace by non-numeric values (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"abcde1234567890\",\"creditCardCvv\":abc,"
+            + "\"creditCardExpirationYear\":abcd,\"creditCardExpirationMonth\":efg}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericNumber() throws Exception {
+        // Number mutation: replace by non-numeric value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"abcde1234567890\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericCvv() throws Exception {
+        // Number mutation: replace by non-numeric value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":abc,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericYear() throws Exception {
+        // Number mutation: replace by non-numeric value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":abcd,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNonNumericMonth() throws Exception {
+        // Number mutation: replace by non-numeric value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":efg}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeNumber() throws Exception {
+        // Number mutation: replace by negative value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"-1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeCvv() throws Exception {
+        // Number mutation: replace by negative value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":-123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeYear() throws Exception {
+        // Number mutation: replace by negative value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":-2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardNegativeMonth() throws Exception {
+        // Number mutation: replace by negative value (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":-12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumberShortCvv() throws Exception {
+        // Number mutation: replace by too long number and short cvv (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumberShortYear() throws Exception {
+        // Number mutation: replace by too long number and short year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":20,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumberShortMonth() throws Exception {
+        // Number mutation: replace by too long number and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":2}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumberShortCvvShortYear() throws Exception {
+        // Number mutation: replace by too long number, short cvv and short year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":20,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumberShortCvvShortMonth() throws Exception {
+        // Number mutation: replace by too long number, short cvv and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":2}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumberShortYearShortMonth() throws Exception {
+        // Number mutation: replace by too long number, short year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":20,\"creditCardExpirationMonth\":2}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooLongNumberShortCvvShortYearShortMonth() throws Exception {
+        // Number mutation: replace by too long number, short cvv, short year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"12345678901234567\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":20,\"creditCardExpirationMonth\":2}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumber() throws Exception {
+        // Number mutation: replace by too short number (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvv() throws Exception {
+        // Number mutation: replace by too short number and long cvv (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongYear() throws Exception {
+        // Number mutation: replace by too short number and long year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongMonth() throws Exception {
+        // Number mutation: replace by too short number and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYear() throws Exception {
+        // Number mutation: replace by too short number, long cvv and long year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongYearLongMonth() throws Exception {
+        // Number mutation: replace by too short number, long year and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":123,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearLongMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberShortCvv() throws Exception {
+        // Number mutation: replace by too short number and short cvv (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberShortCvvLongYear() throws Exception {
+        // Number mutation: replace by too short number, short cvv and long year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberShortCvvLongMonth() throws Exception {
+        // Number mutation: replace by too short number, short cvv and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberShortCvvLongCvvLongYear() throws Exception {
+        // Number mutation: replace by too short number, short cvv, long cvv and long year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberShortCvvLongCvvLongMonth() throws Exception {
+        // Number mutation: replace by too short number, short cvv, long cvv and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberShortCvvLongYearLongMonth() throws Exception {
+        // Number mutation: replace by too short number, short cvv, long year and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberShortCvvLongCvvLongYearLongMonth() throws Exception {
+        // Number mutation: replace by too short number, short cvv, long cvv, long year and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvShortYear() throws Exception {
+        // Number mutation: replace by too short number, long cvv and short year (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvShortYearLongMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, short year and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearLongMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearLongMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and long month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":123}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvShortYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, short year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\","
+            + "\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\","
+            + "\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},"
+            + "\"email\":\"test@example.com\","
+            + "\"creditCard\":{\"creditCardNumber\":\"123456789012345\",\"creditCardCvv\":1234,"
+            + "\"creditCardExpirationYear\":20255,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
+        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+       
 

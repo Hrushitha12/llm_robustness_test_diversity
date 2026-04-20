@@ -1,0 +1,70 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelC_Guided_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_getProducts_nullProductId() throws Exception {
+        HttpResponse<String> response = get("/api/products/null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R2_getProductById_emptyStringId() throws Exception {
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R3_getCart_nullSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_addToCart_missingProductId() throws Exception {
+        String body = "{\"userId\":\"testuser\",\"item\":{\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_emptyCart_nullSessionId() throws Exception {
+        HttpResponse<String> response = delete("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R6_placeOrder_missingUserId() throws Exception {
+        String body = "{\"userCurrency\":\"USD\",\"address\":{},\"email\":\"test@example.com\","
+                + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,"
+                + "\"creditCardExpirationYear\":2023,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R7_convertCurrency_missingToCode() throws Exception {
+        String body = "{\"from\":{\"currencyCode\":\"USD\",\"units\":100,\"nanos\":0}}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R8_calculateShipping_missingItems() throws Exception {
+        String body = "{\"address\":{}}";
+        HttpResponse<String> response = postJson("/api/shipping", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R9_recommendations_nullProductIds() throws Exception {
+        HttpResponse<String> response = get("/api/recommendations?productIds=&sessionId=test&currencyCode=USD");
+        assertNoServerError(response);
+    }
+}
+```
+
