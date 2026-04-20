@@ -1,0 +1,587 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelE_GuidedFewShot_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_ProductEmptyId() throws Exception {
+        // String mutation: replace by empty string
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartMissingSessionId() throws Exception {
+        // Structural mutation: omit required parameter entirely
+        HttpResponse<String> response = get("/api/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddFieldAbsentItem() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\"}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNullItem() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":\"user-1\",\"item\":null}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddEmptyProductId() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNullProductId() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":null,\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddPredefinedProductId() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"abc123\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNonprintableProductId() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\u0000\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddAlphanumericProductId() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"123abc\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddOverflowProductId() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7ZOLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddQuantityMinusOne() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddQuantityZero() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddQuantityOne() throws Exception {
+        // Number mutation: replace by 1
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddQuantityMaxInt() throws Exception {
+        // Number mutation: replace by maximum number valid for the type
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2147483647}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddQuantityMinInt() throws Exception {
+        // Number mutation: replace by minimum number valid for the type
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-2147483648}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddQuantityOverflow() throws Exception {
+        // Number mutation: replace by maximum valid value plus one (overflow)
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2147483648}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddQuantityUnderflow() throws Exception {
+        // Number mutation: replace by minimum valid value minus one (underflow)
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-2147483649}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddEmptyUserId() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNullUserId() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":null,\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddPredefinedUserId() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"abc123\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNonprintableUserId() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\u0000\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddAlphanumericUserId() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"123abc\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddOverflowUserId() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyBody() throws Exception {
+        // Structural mutation: send empty JSON object
+        String body = "{}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullBody() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "null";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingUserId() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyUserId() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullUserId() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":null,\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutPredefinedUserId() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"abc123\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonprintableUserId() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\u0000\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAlphanumericUserId() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"123abc\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutOverflowUserId() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingUserCurrency() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyUserCurrency() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullUserCurrency() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":null,\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutPredefinedUserCurrency() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"abc123\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonprintableUserCurrency() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\u0000\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAlphanumericUserCurrency() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"123abc\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutOverflowUserCurrency() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USDUSD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingAddress() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullAddress() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":null,\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingStreetAddress() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyStreetAddress() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullStreetAddress() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":null,\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutPredefinedStreetAddress() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"abc123\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonprintableStreetAddress() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\u0000\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAlphanumericStreetAddress() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123abc\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutOverflowStreetAddress() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St 123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingState() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyState() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullState() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":null,\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutPredefinedState() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"abc123\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonprintableState() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\u0000\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAlphanumericState() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"123abc\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutOverflowState() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"California California\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingCountry() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyCountry() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullCountry() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":null,\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutPredefinedCountry() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"abc123\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonprintableCountry() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"United States\u0000\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAlphanumericCountry() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"123abc\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutOverflowCountry() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"United States of America United States of America\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingCity() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyCity() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullCity() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":null,\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutPredefinedCity() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"abc123\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNonprintableCity() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\u0000\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutAlphanumericCity() throws Exception {
+        // String mutation: replace by alphanumeric string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"123abc\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutOverflowCity() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield Illinois Springfield Illinois\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingZipCode() throws Exception {
+        // Structural mutation: omit required field from JSON body
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyZipCode() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutNullZipCode() throws Exception {
+        // String mutation: replace by null value
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":null},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutPredefinedZipCode() throws Exception {
+        // String mutation: replace by predefined string
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"abc123\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api

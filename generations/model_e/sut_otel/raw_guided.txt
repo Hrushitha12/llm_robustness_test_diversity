@@ -1,0 +1,144 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelE_Guided_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_empty_productId() throws Exception {
+        HttpResponse<String> response = get("/api/products/{}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R2_nonprintable_productId() throws Exception {
+        HttpResponse<String> response = get("/api/products/\u0000\u0001");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R3_alphanumeric_productId() throws Exception {
+        HttpResponse<String> response = get("/api/products/abcdefg");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_null_sessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_empty_sessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R6_nonprintable_sessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=\u0000\u0001");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R7_null_userId() throws Exception {
+        String jsonBody = "{\"userId\":null,\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R8_empty_userId() throws Exception {
+        String jsonBody = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R9_nonprintable_userId() throws Exception {
+        String jsonBody = "{\"userId\":\"\u0000\u0001\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R10_null_productId_in_item() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"item\":{\"productId\":null,\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R11_empty_productId_in_item() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R12_nonprintable_productId_in_item() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"item\":{\"productId\":\"\u0000\u0001\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R13_zero_quantity() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R14_negative_quantity() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R15_null_address() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"address\":null,\"creditCard\":{\"creditCardNumber\":\"1234\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R16_empty_address() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"creditCard\":{\"creditCardNumber\":\"1234\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R17_nonprintable_address() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"address\":{\"streetAddress\":\"\u0000\u0001\",\"state\":\"\u0000\u0001\",\"country\":\"\u0000\u0001\",\"city\":\"\u0000\u0001\",\"zipCode\":\"\u0000\u0001\"},\"creditCard\":{\"creditCardNumber\":\"1234\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R18_null_creditCardNumber() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"address\":{\"streetAddress\":\"addr\",\"state\":\"state\",\"country\":\"country\",\"city\":\"city\",\"zipCode\":\"12345\"},\"creditCard\":{\"creditCardNumber\":null,\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R19_empty_creditCardNumber() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"address\":{\"streetAddress\":\"addr\",\"state\":\"state\",\"country\":\"country\",\"city\":\"city\",\"zipCode\":\"12345\"},\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R20_nonprintable_creditCardNumber() throws Exception {
+        String jsonBody = "{\"userId\":\"user\",\"address\":{\"streetAddress\":\"addr\",\"state\":\"state\",\"country\":\"country\",\"city\":\"city\",\"zipCode\":\"12345\"},\"creditCard\":{\"creditCardNumber\":\"\u0000\u0001\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+}
+```
+
