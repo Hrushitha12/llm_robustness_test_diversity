@@ -2644,8 +2644,6 @@ public class OTelShop_ModelD_GuidedFewShot_RobustnessTest extends OTelShopBaseTe
         assertNoServerError(response);
     }
 
-    @Test
-    public void test_R1_CheckoutCreditCardTooShortNumberLongCvvLongYearShortMonth() throws Exception {
-        // Number mutation: replace by too short number, long cvv, long year and short month (invalid)
+}
        
 
