@@ -1,92 +1,79 @@
-# LLM Robustness Test Diversity
+# LLM-Based Robustness Testing of Microservice Applications
 
-**Individual Study — ITCS 6882 | UNC Charlotte**  
-**Student:** Hrushitha Goud Tigulla  
-**Supervisor:** Prof. Marco Vieira  
+**Accepted at SRDS 2026** (Practical Experience Report)
+**Authors:** Hrushitha Goud Tigulla, Marco Vieira
+**Affiliation:** University of North Carolina at Charlotte
 
 ---
 
 ## Overview
 
-This repository contains the complete artefacts for a study investigating whether different large language models (LLMs) and prompt strategies produce *diverse* robustness tests for microservice web applications — or whether they converge on the same failures regardless of model size or prompting approach.
+This repository contains the complete artefacts for a controlled empirical study investigating whether different large language models (LLMs) and prompt strategies produce *diverse* robustness tests for microservice web applications, or whether they converge on the same failures regardless of model size or prompting approach.
 
-**Core question:** Does the choice of prompt type or model matter more for discovering failure modes?
+**Core question:** Does the choice of prompt strategy or model matter more for discovering distinct failure modes?
 
-**Short answer:** Prompt type explains more variance than model size. The Structured prompt collapsed all three models to identical FM sets (Jaccard = 1.00) in both SUTs. FewShot and CoT produced the most inter-model diversity.
+**Short answer:** Prompt strategy explains more variation in diversity than model size. The Structured prompt collapses all three models to identical failure-mode (FM) sets (Jaccard = 1.00) in both systems under test. A single model varied across three prompt strategies (Structured, GuidedFewShot, ZeroShot) achieves complete FM coverage on one system — outperforming any multi-model ensemble under a fixed prompt.
 
 ---
 
 ## Systems Under Test
 
-| SUT | Description | Endpoints tested | FMs confirmed |
-|---|---|---|---|
-| **TeaStore** | Java microservice e-commerce (6 containers) | 7 HTTP endpoints | 9 |
-| **OTel Astronomy Shop** | Polyglot microservice e-commerce (CNCF demo) | 6 HTTP endpoints | 14 |
+| SUT | Description | Services | Protocol | FMs confirmed |
+|---|---|---|---|---|
+| **TeaStore** | Java monolingual e-commerce reference app | 6 | Form-encoded HTTP | 9 |
+| **OTel Astronomy Shop** | Polyglot e-commerce demo (Go, C++, Rust, JS, .NET, Java, Python, PHP) | 27 | JSON / gRPC | 14 |
 
 ---
 
-## Models and Prompts
+## Models and Prompt Strategies
 
-| Model | Name | Size |
-|---|---|---|
-| Model C | qwen3:14b | 14B |
-| Model D | qwen2.5-coder:32b | 32B |
-| Model E | llama3.1:70b | 70B |
+| Model | Name | Size | Notes |
+|---|---|---|---|
+| Model C | `qwen3:14b` | 14B | General-purpose |
+| Model D | `qwen2.5-coder:32b` | 32B | Code-specialized |
+| Model E | `llama3.1:70b` | 70B | General-purpose, largest |
 
-**Prompt strategies:** ZeroShot · Structured · FewShot · Chain-of-Thought (CoT) · Self-Refine
+**7 prompt strategies**, in three groups:
+- **Base:** ZeroShot, Structured
+- **Established:** FewShot, Chain-of-Thought (CoT), Self-Refine
+- **Domain-knowledge (introduced in this study):** Guided, GuidedFewShot
 
-**Total runs:** 15 per SUT (14 valid TeaStore, 12 valid OTel)
+Guided and GuidedFewShot embed the mutation taxonomy from Vieira et al. (DSN 2007) as domain context; GuidedFewShot additionally includes the CRASH failure classification and concrete examples disambiguating key-absent vs. value-empty vs. value-null mutations.
+
+**Total runs:** 38 valid of 42 possible (7 strategies × 3 models × 2 SUTs). Four excluded: Model C ZeroShot on both SUTs (non-English language switch mid-generation), Model C Self-Refine on OTel (malformed output), Model E Structured on OTel (repeated system crashes).
 
 ---
 
 ## Repository Structure
 
 ```
-llm-robustness-test-diversity/
+llm_robustness_test_diversity/
 │
 ├── sut_teastore/
 │   ├── env/                        # Docker Compose up/down/ready scripts
-│   └── test_harness/               # Maven project
-│       └── src/test/java/com/example/
-│           ├── TeaStoreBaseTest.java
-│           ├── CanaryTest.java
-│           ├── TeaStore_Manual_R1_RobustnessTest.java
-│           └── TeaStore_Model*_*_RobustnessTest.java  (14 runs)
+│   └── test_harness/               # Maven project (JUnit 5 test sources)
 │
 ├── sut_otel/
 │   ├── env/                        # Docker Compose up/down/ready scripts
-│   └── test_harness/               # Maven project
-│       └── src/test/java/com/example/
-│           ├── OTelShopBaseTest.java
-│           ├── CanaryTest.java
-│           ├── OTelShop_Manual_R1_RobustnessTest.java
-│           └── OTelShop_Model*_*_RobustnessTest.java  (12 runs)
+│   └── test_harness/               # Maven project (JUnit 5 test sources)
 │
 ├── prompts/
-│   ├── model_c_teastore/           # 5 prompt files per model per SUT
-│   ├── model_d_teastore/
-│   ├── model_e_teastore/
-│   ├── model_c_otel/
-│   ├── model_d_otel/
-│   └── model_e_otel/
+│   ├── model_c_teastore/  model_d_teastore/  model_e_teastore/
+│   └── model_c_otel/      model_d_otel/      model_e_otel/
+│                                    # Full text of all 7 prompt strategies,
+│                                    # per model, per SUT
 │
-├── results/
-│   ├── teastore/                   # JSONL files (1 per run)
-│   └── otel/                       # JSONL files (1 per run)
+├── generations/
+│   └── model_c/ model_d/ model_e/  # Raw LLM output prior to cleaning/compilation
+│
+├── results/                        # JSONL execution results, 1 file per run
 │
 ├── analysis/
-│   ├── teastore/
-│   │   ├── binary_matrix_final.xlsx
-│   │   ├── jaccard_analysis_v2.xlsx
-│   │   ├── venn_diagrams/          # 10 PNG Venn diagrams
-│   │   └── diversity_analysis_report.md
-│   ├── otel/
-│   │   ├── otel_diversity_analysis.xlsx
-│   │   ├── venn_diagrams/          # 10 PNG Venn diagrams
-│   │   └── otel_diversity_analysis_report.md
-│   └── cross_sut/
-│       ├── cross_sut_analysis.xlsx
-│       └── cross_sut_analysis.md
+│   ├── teastore/                   # Binary coverage matrix, Jaccard analysis, Venn diagrams
+│   ├── otel/                       # Binary coverage matrix, Jaccard analysis, Venn diagrams
+│   └── cross_sut/                  # Cross-system comparison
+│
+├── tools/                          # Analysis / cleaning scripts
 │
 └── README.md
 ```
@@ -95,17 +82,15 @@ llm-robustness-test-diversity/
 
 ## Key Findings
 
-1. **Structured prompt collapses diversity** — All models converge to identical FM sets (Jaccard = 1.00) in both SUTs. Replicated finding.
+1. **No single run exceeds 57% coverage** — max 5/9 (56%) on TeaStore, 8/14 (57%) on OTel.
+2. **Prompt strategy explains more diversity variation than model size** — changing the prompt for a fixed model produces roughly twice the FM-set variation of changing the model under a fixed prompt.
+3. **Structured collapse** — all three models converge to identical FM sets (Jaccard = 1.00) on both SUTs, replicated across systems.
+4. **Domain knowledge needs examples, not just rules** — GuidedFewShot improves union coverage over Guided by 2 FMs on each SUT; all three models interpret "replace by null" as value-empty, never key-absent, unless shown concrete examples.
+5. **Code-specialized model transformation** — `qwen2.5-coder:32b` triggers 0 FMs under Self-Refine (missing oracle assertion) but achieves the study's highest single-run coverage (56%/57%) under GuidedFewShot.
+6. **ZeroShot finds state-based failures directed strategies miss** — e.g., checkout with an empty cart, unauthenticated cart removal — because parameter-focused prompts never probe application state.
+7. **Emergent security-aware generation** — several runs produced XSS payloads and control characters in inputs without any instruction to do so.
 
-2. **Prompt strategy > model size** — Changing the prompt on the same model produces more variation than changing the model with the same prompt.
-
-3. **D-Self = ∅ in both SUTs** — qwen2.5-coder:32b with Self-Refine consistently generates zero failures regardless of SUT.
-
-4. **No single run covers all FMs** — TeaStore max = 5/9 (56%), OTel max = 7/14 (50%). Ensemble testing is required.
-
-5. **Emergent security-aware generation** — CoT prompts independently produced XSS and whitespace-in-path inputs across 3 models without instruction. Stronger pattern in OTel (4 runs) than TeaStore (2 runs).
-
-6. **FewShot discovers the rarest FMs** — FM6 in TeaStore (1/14 runs) and FM12/FM13 in OTel (1/12 runs each) were each found by exactly one FewShot run.
+Full findings table and discussion: see the paper.
 
 ---
 
@@ -116,7 +101,7 @@ HTTP status < 500  → PASS  (system handled input gracefully)
 HTTP status ≥ 500  → FAIL  (Abort class — robustness failure)
 ```
 
-Classification follows the CRASH taxonomy (Catastrophic, Restart, Abort, Silent, Hindering). This study detects Abort-class failures only.
+Classification follows the CRASH taxonomy (Catastrophic, Restart, Abort, Silent, Hindering). This study detects Abort-class failures only, via HTTP status code.
 
 ---
 
@@ -126,22 +111,30 @@ Classification follows the CRASH taxonomy (Catastrophic, Restart, Abort, Silent,
 ```bash
 cd sut_teastore && docker compose up -d
 python env/env_ready.py --timeout 180
-mvn test -Dtest="TeaStore_Manual_R1_RobustnessTest" -f test_harness/pom.xml
+mvn test -f test_harness/pom.xml
 ```
 
 **OTel Astronomy Shop:**
 ```bash
 cd opentelemetry-demo  # clone from github.com/open-telemetry/opentelemetry-demo
-docker compose -f docker-compose.minimal.yml up --force-recreate --remove-orphans --detach
-cd ../llm-robustness-test-diversity
+docker compose -f docker-compose.yml up --force-recreate --remove-orphans --detach
+cd ../llm_robustness_test_diversity
 python sut_otel/env/env_ready.py --timeout 300
-mvn test -Dtest="OTelShop_Manual_R1_RobustnessTest" -f sut_otel/test_harness/pom.xml
+mvn test -f sut_otel/test_harness/pom.xml
 ```
 
 ---
 
 ## Notes
 
-- Model C (`qwen3:14b`) generates `<think>` blocks — strip before compiling with `sed -n '/^package com.example/,$p' raw.txt > cleaned.java`
-- Currency and Shipping services are unavailable in OTel minimal compose (always return HTTP 504). Requires full `docker-compose.yml` on a Linux host with `vm.max_map_count=262144`.
-- All test source files were verified against JSONL results before FM assignment.
+- `qwen3:14b` generates `<think>` reasoning blocks that must be stripped before compilation.
+- Currency (`POST /api/currency`) and Shipping (`POST /api/shipping`) return HTTP 504 for all inputs under the minimal Docker Compose configuration; the full compose configuration is required to test these endpoints, and requires a Linux host with `vm.max_map_count=262144`.
+- All test source files were verified against JSONL results before FM assignment; each FM maps to a specific (endpoint, parameter, mutation-type) triple confirmed against application source code.
+
+---
+
+## Citation
+
+If you use this artefact, please cite:
+
+> H. G. Tigulla and M. Vieira, "LLM-Based Robustness Testing of Microservice Applications: An Empirical Study," in *Proc. IEEE Int. Symp. Reliable Distributed Systems (SRDS)*, 2026.
