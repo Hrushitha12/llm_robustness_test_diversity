@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.example.CanaryTest" time="0.584" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.example.OTelShop_ModelD_GuidedFewShot_RobustnessTest" time="1.16" tests="1" errors="0" skipped="0" failures="1">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,9 +15,9 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin"/>
-    <property name="sun.java.command" value="C:\Users\hrush\AppData\Local\Temp\surefire8495352427051395330\surefirebooter-20260420211617103_3.jar C:\Users\hrush\AppData\Local\Temp\surefire8495352427051395330 2026-04-20T21-16-16_593-jvmRun1 surefire-20260420211617103_1tmp surefire_0-20260420211617103_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\hrush\AppData\Local\Temp\surefire17547665680246746119\surefirebooter-20260420211609533_3.jar C:\Users\hrush\AppData\Local\Temp\surefire17547665680246746119 2026-04-20T21-16-08_683-jvmRun1 surefire-20260420211609533_1tmp surefire_0-20260420211609533_2tmp"/>
     <property name="jdk.debug" value="release"/>
-    <property name="test" value="com.example.CanaryTest#test_canary"/>
+    <property name="test" value="com.example.OTelShop_ModelD_GuidedFewShot_RobustnessTest#test_R1_CheckoutCreditCardNegativeNumber"/>
     <property name="surefire.test.class.path" value="C:\Users\hrush\Desktop\experiments\llm_robustness_test_diversity\sut_otel\test_harness\target\test-classes;C:\Users\hrush\Desktop\experiments\llm_robustness_test_diversity\sut_otel\test_harness\target\classes;C:\Users\hrush\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.1\junit-jupiter-api-5.10.1.jar;C:\Users\hrush\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\hrush\.m2\repository\org\junit\platform\junit-platform-commons\1.10.1\junit-platform-commons-1.10.1.jar;C:\Users\hrush\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\hrush\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.1\junit-jupiter-engine-5.10.1.jar;C:\Users\hrush\.m2\repository\org\junit\platform\junit-platform-engine\1.10.1\junit-platform-engine-1.10.1.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
     <property name="user.home" value="C:\Users\hrush"/>
@@ -31,7 +31,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\hrush\AppData\Local\Temp\surefire8495352427051395330\surefirebooter-20260420211617103_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\hrush\AppData\Local\Temp\surefire17547665680246746119\surefirebooter-20260420211609533_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.8+9-LTS"/>
@@ -60,5 +60,18 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="test_canary" classname="com.example.CanaryTest" time="0.221"/>
+  <testcase name="test_R1_CheckoutCreditCardNegativeNumber" classname="com.example.OTelShop_ModelD_GuidedFewShot_RobustnessTest" time="0.343">
+    <failure message="Robustness failure: expected HTTP status &lt; 500 but got 500. Response body: Internal Server Error ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: Robustness failure: expected HTTP status < 500 but got 500. Response body: Internal Server Error ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at com.example.OTelShopBaseTest.assertNoServerError(OTelShopBaseTest.java:84)
+	at com.example.OTelShop_ModelD_GuidedFewShot_RobustnessTest.test_R1_CheckoutCreditCardNegativeNumber(OTelShop_ModelD_GuidedFewShot_RobustnessTest.java:446)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+]]></failure>
+  </testcase>
 </testsuite>

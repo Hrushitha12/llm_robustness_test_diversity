@@ -1,0 +1,177 @@
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelE_Guided_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_getProducts() throws Exception {
+        HttpResponse<String> response = get("/api/products");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R2_getProductById_NullId() throws Exception {
+        HttpResponse<String> response = get("/api/products/null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R3_getProductById_EmptyId() throws Exception {
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_getProductById_InvalidId() throws Exception {
+        HttpResponse<String> response = get("/api/products/ invalid-id");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_getCart_NullSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R6_getCart_EmptySessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R7_addToCart_NullUserId() throws Exception {
+        String jsonBody = "{\"userId\":null,\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R8_addToCart_EmptyUserId() throws Exception {
+        String jsonBody = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R9_addToCart_NullItemId() throws Exception {
+        String jsonBody = "{\"userId\":\"user-123\",\"item\":{\"productId\":null,\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R10_addToCart_EmptyItemId() throws Exception {
+        String jsonBody = "{\"userId\":\"user-123\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R11_addToCart_InvalidQuantity() throws Exception {
+        String jsonBody = "{\"userId\":\"user-123\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R12_emptyCart_NullSessionId() throws Exception {
+        HttpResponse<String> response = delete("/api/cart?sessionId=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R13_emptyCart_EmptySessionId() throws Exception {
+        HttpResponse<String> response = delete("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R14_placeOrder_NullUserId() throws Exception {
+        String jsonBody = "{\"userId\":null,\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"Anytown\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234-5678-9012-3456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R15_placeOrder_EmptyUserId() throws Exception {
+        String jsonBody = "{\"userId\":\"\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"Anytown\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234-5678-9012-3456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R16_placeOrder_InvalidCreditCardNumber() throws Exception {
+        String jsonBody = "{\"userId\":\"user-123\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"Anytown\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\" invalid-card-number\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R17_convertCurrency_NullFromCurrency() throws Exception {
+        String jsonBody = "{\"from\":{\"currencyCode\":null,\"units\":100,\"nanos\":0},\"toCode\":\"EUR\"}";
+        HttpResponse<String> response = postJson("/api/currency", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R18_convertCurrency_EmptyFromCurrency() throws Exception {
+        String jsonBody = "{\"from\":{\"currencyCode\":\"\",\"units\":100,\"nanos\":0},\"toCode\":\"EUR\"}";
+        HttpResponse<String> response = postJson("/api/currency", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R19_convertCurrency_InvalidFromUnits() throws Exception {
+        String jsonBody = "{\"from\":{\"currencyCode\":\"USD\",\"units\":-100,\"nanos\":0},\"toCode\":\"EUR\"}";
+        HttpResponse<String> response = postJson("/api/currency", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R20_calculateShipping_NullAddress() throws Exception {
+        String jsonBody = "{\"address\":null,\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}";
+        HttpResponse<String> response = postJson("/api/shipping", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R21_calculateShipping_EmptyAddress() throws Exception {
+        String jsonBody = "{\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}";
+        HttpResponse<String> response = postJson("/api/shipping", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R22_calculateShipping_InvalidItemId() throws Exception {
+        String jsonBody = "{\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"Anytown\",\"zipCode\":\"12345\"},\"items\":[{\"productId\":\" invalid-item-id\",\"quantity\":1}]}";
+        HttpResponse<String> response = postJson("/api/shipping", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R23_getRecommendations_NullProductIds() throws Exception {
+        HttpResponse<String> response = get("/api/recommendations?productIds=null&sessionId=12345&currencyCode=USD");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R24_getRecommendations_EmptyProductIds() throws Exception {
+        HttpResponse<String> response = get("/api/recommendations?productIds=&sessionId=12345&currencyCode=USD");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R25_getAds_NullContextKeys() throws Exception {
+        HttpResponse<String> response = get("/api/ads?contextKeys=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R26_getAds_EmptyContextKeys() throws Exception {
+        HttpResponse<String> response = get("/api/ads?contextKeys=");
+        assertNoServerError(response);
+    }
+}
