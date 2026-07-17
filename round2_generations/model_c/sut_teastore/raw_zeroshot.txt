@@ -1,0 +1,540 @@
+Thinking...
+Okay, I need to create a JUnit 5 test class for the TeaStore microservice. The user specified that the class should be in the package com.example and named TeaStore_ModelC_ZeroShot_RobustnessTest. Each test method must start with test_R1_ and there should be between 15 to 18 tests. The tests must use get() or post() methods and then assertNoServerError().
+
+First, I should think about the endpoints available. The GET endpoints include the main page, category by ID, product by ID, cart, and profile. The POST endpoints are loginAction, cartAction (for adding and removing products), and order confirmation.
+
+For robustness testing, I need to cover both valid and invalid inputs. For example, invalid category IDs, product IDs that don't exist, incorrect login credentials, etc. Also, edge cases like negative IDs, empty strings, or missing parameters.
+
+Let me list possible test cases:
+
+1. Test the main page (GET /) – should return 200.
+2. Test a valid category ID (like 1).
+3. Test an invalid category ID (like 0 or a non-existent ID).
+4. Test a valid product ID.
+5. Test an invalid product ID.
+6. Test accessing the cart without logging in – should return 302 or 401.
+7. Test accessing the profile without logging in – same as above.
+8. Test login with correct credentials.
+9. Test login with wrong password.
+10. Test login with non-existent user.
+11. Test adding a product to cart with valid ID.
+12. Test adding a product with invalid ID.
+13. Test removing a product from cart with valid ID.
+14. Test removing a product with invalid ID.
+15. Test confirming an order without items in cart.
+16. Test confirming an order with valid items.
+17. Test invalid POST parameters, like missing productid in cartAction.
+18. Test empty body in POST requests.
+
+Wait, but the user said to use get() or post() with robustness inputs. So each test should make a request and then check that the response is not a 5xx.
+
+Now, for each test method, I need to create a unique name starting with test_R1_. Let me think of the order.
+
+For the GET endpoints:
+
+- test_R1_GetMainPage: GET /
+- test_R1_GetCategoryValid: GET /category?id=1
+- test_R1_GetCategoryInvalid: GET /category?id=999 (assuming that's invalid)
+- test_R1_GetProductValid: GET /product?id=1
+- test_R1_GetProductInvalid: GET /product?id=999
+- test_R1_GetCartUnauthenticated: GET /cart
+- test_R1_GetProfileUnauthenticated: GET /profile
+
+For POST endpoints:
+
+- test_R1_LoginValid: POST /loginAction with correct credentials
+- test_R1_LoginInvalidPassword: POST with wrong password
+- test_R1_LoginNonExistentUser: POST with a user that doesn't exist
+- test_R1_AddToCartValid: POST /cartAction with addToCart and valid productid
+- test_R1_AddToCartInvalidProduct: POST with invalid productid
+- test_R1_RemoveProductValid: POST /cartAction with removeProduct and valid productid
+- test_R1_RemoveProductInvalid: POST with invalid productid
+- test_R1_ConfirmOrderEmptyCart: POST /order with confirm=
+- test_R1_ConfirmOrderValid: POST /order after adding items
+- test_R1_CartActionMissingParam: POST /cartAction without productid
+- test_R1_LoginMissingParams: POST /loginAction without username or password
+- test_R1_OrderMissingConfirm: POST /order without confirm parameter
+
+Wait, that's more than 18. Let me count again. The initial list had 18, but maybe I can adjust. Also, need to ensure that each test is unique and covers different scenarios.
+
+Also, for the POST requests, the body needs to be properly formatted. For example, the loginAction requires username and password. The cartAction has two possible bodies: addToCart and productid, or removeProduct and productid. The order requires confirm=.
+
+Now, considering that some tests might require prior actions, like logging in before accessing cart or profile. But since robustness tests are about handling inputs, maybe even if the user isn't logged in, the system should handle it without 5xx errors.
+
+For example, accessing /cart when not logged in might redirect to login, which is 302, which is acceptable. The system passes if the response is not 5xx.
+
+Another thing: the test_R1_GetCartUnauthenticated and test_R1_GetProfileUnauthenticated would be tests where the user is not logged in, so the server might return 302 or 401, but not 5xx.
+
+Also, for the POST /cartAction, if the productid is missing, the server might return 400, but again, not 5xx.
+
+So each test should make a request and then assert that the response is not a 5xx.
+
+Now, the code structure:
+
+The class extends TeaStoreBaseTest, which provides get and post methods, and assertNoServerError.
+
+Each test method will call get or post, then assertNoServerError.
+
+Now, the code:
+
+Import statements: java.net.http.HttpResponse, org.junit.jupiter.api.Test, etc.
+
+The class is in com.example.
+
+Now, writing the methods:
+
+For example:
+
+@Test
+void test_R1_GetMainPage() {
+    HttpResponse<String> response = get("/");
+    assertNoServerError(response);
+}
+
+Similarly for others.
+
+But need to make sure that each test is unique and covers different inputs.
+
+Another point: for the cartAction, the POST body can be either addToCart=... or removeProduct=... So tests for both cases.
+
+Also, for the order confirmation, maybe after adding a product to the cart, then confirming.
+
+But the problem says "robustness inputs" – so even if the input is invalid, as long as the server doesn't return 5xx, it's okay.
+
+So, for example, adding a product with a non-integer productid, like "abc", would be invalid, but the server should return 4xx, not 5xx.
+
+But the user didn't specify if the inputs are valid or invalid, just that the test must call get or post with a robustness input. So perhaps the tests should include both valid and invalid inputs, but the system must handle them without 5xx.
+
+So, the tests should cover:
+
+- Valid inputs (expect 2xx, 3xx)
+- Invalid inputs (expect 4xx)
+But the system passes if the response is not 5xx.
+
+So, the tests should include both cases.
+
+Now, considering that, here's a list of tests:
+
+1. GET / – valid
+2. GET /category?id=1 – valid
+3. GET /category?id=999 – invalid
+4. GET /product?id=1 – valid
+5. GET /product?id=999 – invalid
+6. GET /cart – unauthenticated
+7. GET /profile – unauthenticated
+8. POST /loginAction with valid credentials
+9. POST /loginAction with invalid password
+10. POST /loginAction with non-existent user
+11. POST /cartAction addToCart with valid productid
+12. POST /cartAction addToCart with invalid productid
+13. POST /cartAction removeProduct with valid productid
+14. POST /cartAction removeProduct with invalid productid
+15. POST /order confirm= (empty cart)
+16. POST /order confirm= (after adding item)
+17. POST /cartAction addToCart with missing productid
+18. POST /loginAction with missing username
+19. POST /loginAction with missing password
+20. POST /cartAction with invalid action (but the body is either addToCart or removeProduct)
+
+But the user asked for 15-18 tests. Let me pick 18.
+
+So, maybe combine some of the login missing parameters into one test, but perhaps not. Let's see.
+
+Let me proceed to code.
+
+Each test method is a @Test annotated method with unique names.
+
+Now, code:
+
+package com.example;
+
+import org.junit.jupiter.api.Test;
+import java.net.http.HttpResponse;
+
+public class TeaStore_ModelC_ZeroShot_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    void test_R1_GetMainPage() {
+        HttpResponse<String> response = get("/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryValid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryInvalid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductValid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductInvalid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCartUnauthenticated() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProfileUnauthenticated() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/profile");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginValid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=testuser&password=testpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginInvalidPassword() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=testuser&password=wrongpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginNonExistentUser() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=nonexistent&password=testpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_AddToCartValid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_AddToCartInvalidProduct() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_RemoveProductValid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_RemoveProductInvalid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_ConfirmOrderEmptyCart() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_ConfirmOrderWithItems() {
+        // Assuming adding a product first
+        post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=1");
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_CartActionMissingProductid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginMissingUsername() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "password=testpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginMissingPassword() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=testuser");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_CartActionInvalidAction() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "invalidAction=&productid=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_OrderMissingConfirm() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryNegativeId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductNegativeId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_AddToCartNonNumericId() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=abc");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_RemoveProductNonNumericId() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=abc");
+        assertNoServerError(response);
+    }
+}
+
+Wait, that's more than 18. Let me count the tests in the code above. The initial list had 18, but then adding more. The user said 15-18. Let me adjust.
+
+Looking back, the initial tests I listed were 18. But perhaps some can be merged or removed. For example, the test_R1_ConfirmOrderWithItems may require prior steps (adding to cart), but the system should handle the order confirmation even if the cart is empty. However, the test_R1_ConfirmOrderEmptyCart is already there.
+
+Alternatively, maybe some of the tests are redundant. For example, test_R1_GetCategoryNegativeId and test_R1_GetProductNegativeId are valid tests for invalid IDs.
+
+But the user didn't specify to avoid redundancy, just to have 15-18 tests.
+
+Alternatively, perhaps the initial code has 18 tests. Let me count:
+
+Looking at the code above:
+
+test_R1_GetMainPage
+
+test_R1_GetCategoryValid
+
+test_R1_GetCategoryInvalid
+
+test_R1_GetProductValid
+
+test_R1_GetProductInvalid
+
+test_R1_GetCartUnauthenticated
+
+test_R1_GetProfileUnauthenticated
+
+test_R1_LoginValid
+
+test_R1_LoginInvalidPassword
+
+test_R1_LoginNonExistentUser
+
+test_R1_AddToCartValid
+
+test_R1_AddToCartInvalidProduct
+
+test_R1_RemoveProductValid
+
+test_R1_RemoveProductInvalid
+
+test_R1_ConfirmOrderEmptyCart
+
+test_R1_ConfirmOrderWithItems
+
+test_R1_CartActionMissingProductid
+
+test_R1_LoginMissingUsername
+
+test_R1_LoginMissingPassword
+
+test_R1_CartActionInvalidAction
+
+test_R1_OrderMissingConfirm
+
+test_R1_GetCategoryNegativeId
+
+test_R1_GetProductNegativeId
+
+test_R1_AddToCartNonNumericId
+
+test_R1_RemoveProductNonNumericId
+
+That's 24 tests. But the user asked for 15-18. So I need to trim it down.
+
+Let me pick the most critical ones:
+
+1. test_R1_GetMainPage
+
+2. test_R1_GetCategoryValid
+
+3. test_R1_GetCategoryInvalid
+
+4. test_R1_GetProductValid
+
+5. test_R1_GetProductInvalid
+
+6. test_R1_GetCartUnauthenticated
+
+7. test_R1_GetProfileUnauthenticated
+
+8. test_R1_LoginValid
+
+9. test_R1_LoginInvalidPassword
+
+10. test_R1_LoginNonExistentUser
+
+11. test_R1_AddToCartValid
+
+12. test_R1_AddToCartInvalidProduct
+
+13. test_R1_RemoveProductValid
+
+14. test_R1_RemoveProductInvalid
+
+15. test_R1_ConfirmOrderEmptyCart
+
+16. test_R1_ConfirmOrderWithItems
+
+17. test_R1_LoginMissingUsername
+
+18. test_R1_LoginMissingPassword
+
+That's 18 tests. So I can remove the others.
+
+So the final code would have these 18 tests.
+
+But I need to make sure that the code is correct. For example, test_R1_ConfirmOrderWithItems may require adding an item first, but in the code, the post is done without authentication. However, the system may require authentication to add items to the cart. This could be an issue. But since the user didn't mention authentication, perhaps the tests are written as per the given endpoints.
+
+Assuming that the endpoints are correct, the code is acceptable.
+
+Thus, the final code would have these 18 tests.
+...done thinking.
+
+```java
+package com.example;
+
+import org.junit.jupiter.api.Test;
+import java.net.http.HttpResponse;
+
+public class TeaStore_ModelC_ZeroShot_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    void test_R1_GetMainPage() {
+        HttpResponse<String> response = get("/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryValid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryInvalid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductValid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductInvalid() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCartUnauthenticated() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProfileUnauthenticated() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/profile");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginValid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=testuser&password=testpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginInvalidPassword() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=testuser&password=wrongpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginNonExistentUser() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=nonexistent&password=testpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_AddToCartValid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_AddToCartInvalidProduct() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_RemoveProductValid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_RemoveProductInvalid() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_ConfirmOrderEmptyCart() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_ConfirmOrderWithItems() {
+        post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=1");
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginMissingUsername() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "password=testpass");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginMissingPassword() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=testuser");
+        assertNoServerError(response);
+    }
+}
+```
+

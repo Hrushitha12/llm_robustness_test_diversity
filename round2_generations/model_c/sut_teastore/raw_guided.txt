@@ -1,0 +1,476 @@
+Thinking...
+Okay, I need to create a JUnit 5 test class for the TeaStore microservice, focusing on robustness testing. Let me start by understanding the requirements.
+
+First, the test class must extend TeaStoreBaseTest, which provides methods like get(), post(), and assertNoServerError(). The goal is to apply mutation rules to each parameter of the endpoints to test how the system handles invalid inputs. The oracle is that any response with a status code less than 500 is acceptable.
+
+Looking at the available endpoints, each has specific parameters. For example, the GET /category endpoint has an integer id parameter. The POST /loginAction has username and password as strings. The POST /cartAction has productid as an integer, etc.
+
+I need to cover as many endpoints and mutation categories as possible. Let's list out the endpoints and their parameters:
+
+1. GET /tools.descartes.teastore.webui/ – no parameters.
+2. GET /tools.descartes.teastore.webui/category?id=<integer> – id is integer.
+3. GET /tools.descartes.teastore.webui/product?id=<integer> – id is integer.
+4. GET /tools.descartes.teastore.webui/cart – no parameters.
+5. GET /tools.descartes.teastore.webui/profile – no parameters.
+6. POST /tools.descartes.teastore.webui/loginAction – username and password are strings.
+7. POST /tools.descartes.teastore.webui/cartAction – productid is integer (for both add and remove).
+8. POST /tools.descartes.teastore.webui/order – confirm is a string (but the body is "confirm=").
+
+For each parameter, apply the mutation rules. Let's start with the category endpoint's id parameter. Since it's an integer, the mutations would include null, empty, -1, 0, 1, max, min, overflow, underflow, etc. But the endpoint expects an integer, so for example, if the id is omitted (empty), the server might return a 400 or 404. But the test should check if the response is not 5xx.
+
+For the loginAction, the username and password are strings. So mutations would include null, empty, non-printable characters, etc. For example, testing with empty username or password, or non-printable characters.
+
+The cartAction has productid as integer. So similar to the category endpoint. Also, the POST body has two different actions: addToCart and removeProduct. So for each action, the productid is an integer parameter.
+
+The order endpoint's body is "confirm=", but the parameter is the string "confirm". However, the body is fixed as "confirm=". Maybe the parameter is not present, but the body is a fixed string. Not sure, but perhaps the confirm parameter is a string, but the mutation rules would apply to it. However, since the body is fixed, maybe it's not a parameter. Hmm, maybe that's a fixed string and not a parameter. So perhaps that endpoint doesn't have parameters to mutate.
+
+Now, for each endpoint, I need to create test methods. Each test method must start with test_R1_ and throw Exception. Each test should call get() or post() with a mutated parameter and then assertNoServerError().
+
+Let me think about the possible test cases:
+
+For GET /category with id:
+
+- Test id as null (but in URL parameters, how is that represented? Maybe as ?id=null, but the server might not accept that. But the mutation rule says to replace by null, so maybe the URL is ?id=null. But the server might not handle that and return 400, which is acceptable as it's not 5xx.)
+
+- Test id as empty (i.e., omit the parameter, but the endpoint expects it. So the URL would be /category, which would be invalid. But the server might return 400.)
+
+Wait, the mutation rules for number parameters include "replace by empty value (omit the parameter)". So for the id parameter, omitting it would be a test case. So the URL would be /category without the id parameter.
+
+For the product endpoint, similar tests.
+
+For the loginAction, the username and password can be mutated. For example, empty strings, null, non-printable characters, etc.
+
+For the cartAction, the productid can be mutated. For example, productid=-1, productid=0, etc.
+
+Now, I need to create test methods for each of these cases. Let's start with the category endpoint.
+
+Test_R1_CategoryIdNull: send GET /category?id=null. But in HTTP, the parameter is a string, so the server might not accept "null" as an integer. The server might return 400, which is acceptable.
+
+Test_R1_CategoryIdEmpty: send GET /category (omit the id parameter). The server might return 400 or 404, but not 500.
+
+Similarly for product endpoint.
+
+For loginAction, test username as empty, password as empty, etc.
+
+But each test method must be unique and cover different mutation categories. Also, need to cover as many endpoints as possible.
+
+Another thing to consider: for POST requests, the body is a string. For example, for cartAction, the body is "addToCart=&productid=..." So the productid is part of the body. So for the productid parameter, mutations would be applied to the value in the body.
+
+For example, test_R1_CartActionAddProductidMax: send POST /cartAction with body addToCart=&productid=Integer.MAX_VALUE.
+
+Also, test_R1_CartActionRemoveProductidMin: send POST /cartAction with body removeProduct=&productid=Integer.MIN_VALUE.
+
+For the loginAction, test_R1_LoginActionUsernameNull: send POST with username=null&password=valid. But in the body, the parameters are strings, so the server might not accept "null" as a username. But the test is to check if the server returns a non-500 status.
+
+Now, the challenge is to create as many unique test methods as possible, each applying different mutation rules to different parameters of different endpoints.
+
+Let me list possible test cases:
+
+1. GET /category with id as null (string "null").
+2. GET /category with id omitted (empty value).
+3. GET /category with id as -1.
+4. GET /category with id as Integer.MAX_VALUE.
+5. GET /category with id as Integer.MIN_VALUE.
+6. GET /product with id as 0.
+7. GET /product with id as 1.
+8. POST /loginAction with username empty.
+9. POST /loginAction with password empty.
+10. POST /loginAction with username non-printable.
+11. POST /loginAction with password non-printable.
+12. POST /cartAction (add) with productid=0.
+13. POST /cartAction (add) with productid=Integer.MAX_VALUE +1 (overflow).
+14. POST /cartAction (remove) with productid=Integer.MIN_VALUE -1 (underflow).
+15. GET /profile (no parameters, but maybe test with some invalid parameters? But the endpoint doesn't have parameters. So maybe not applicable.)
+16. POST /order with confirm=empty string.
+17. POST /order with confirm=non-printable.
+18. GET /cart (no parameters, but test with invalid parameters? Not sure.)
+
+But for the endpoints without parameters, like GET /, GET /cart, GET /profile, there are no parameters to mutate. So maybe those endpoints can't be tested with parameter mutations. However, perhaps the test can be to send invalid parameters (like adding some query parameters that the endpoint doesn't expect). But the problem statement says to apply mutation rules to each parameter of the endpoints. So for endpoints without parameters, there's nothing to mutate. So perhaps those endpoints don't need tests for parameter mutations.
+
+So focusing on endpoints with parameters.
+
+Now, for each parameter, apply the most distinct mutations. For example, for the id parameter in GET /category, test with null, empty, -1, 0, 1, max, min, overflow, underflow.
+
+But the problem says to select the most distinct mutations. So maybe pick a few for each parameter.
+
+Also, for the POST /loginAction, the username and password are strings. So test with empty, non-printable, etc.
+
+For the cartAction, the productid is integer. So test with various values.
+
+Now, the test class needs to have methods starting with test_R1_ and each must have a unique name.
+
+Let me draft the test methods:
+
+For GET /category:
+
+- test_R1_CategoryIdNull: id is "null" (string)
+- test_R1_CategoryIdEmpty: omit id parameter
+- test_R1_CategoryIdMinus1: id=-1
+- test_R1_CategoryIdMax: id=Integer.MAX_VALUE
+- test_R1_CategoryIdMin: id=Integer.MIN_VALUE
+- test_R1_CategoryIdOverflow: id=Integer.MAX_VALUE +1
+- test_R1_CategoryIdUnderflow: id=Integer.MIN_VALUE -1
+
+But since the problem says to cover as many endpoints and mutation categories as possible, maybe pick a few for each parameter.
+
+For example, for the category id, test with null, empty, -1, max, overflow.
+
+Similarly for product id.
+
+For loginAction, test with empty username, empty password, non-printable username, non-printable password.
+
+For cartAction add, test productid=0, productid=1, productid=overflow.
+
+For cartAction remove, test productid=0, productid=underflow.
+
+For the order endpoint, confirm is a string. But the body is "confirm=", so maybe the parameter is not present. Or perhaps the confirm parameter is a string. But the body is fixed. So maybe not applicable.
+
+Now, let's code these tests.
+
+Each test method will call get() or post() with the mutated parameter and then assertNoServerError().
+
+For example:
+
+test_R1_CategoryIdNull:
+
+get("/tools.descartes.teastore.webui/category?id=null");
+
+But the server may not accept "null" as an integer. But the test is to check that it doesn't return 5xx.
+
+Similarly for other cases.
+
+Now, the code:
+
+The class name is TeaStore_ModelC_Guided_RobustnessTest, in package com.example.
+
+Each test method must be in the class, with unique names starting with test_R1_.
+
+Now, considering that each test method must throw Exception, and use get() or post().
+
+So, the code would look like:
+
+public class TeaStore_ModelC_Guided_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    public void test_R1_CategoryIdNull() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdEmpty() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdMinus1() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdMax() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdOverflow() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(response);
+    }
+
+    // Similar for product endpoint.
+
+    @Test
+    public void test_R1_ProductIdNull() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdEmpty() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdMinus1() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdMax() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdOverflow() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(response);
+    }
+
+    // LoginAction tests.
+
+    @Test
+    public void test_R1_LoginActionUsernameEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_LoginActionPasswordEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_LoginActionUsernameNonPrintable() throws Exception {
+        String nonPrintable = "\u0000"; // Null character
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=" + nonPrintable + "&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_LoginActionPasswordNonPrintable() throws Exception {
+        String nonPrintable = "\u0000"; // Null character
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=" + nonPrintable);
+        assertNoServerError(response);
+    }
+
+    // CartAction add tests.
+
+    @Test
+    public void test_R1_CartActionAddProductidZero() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionAddProductidMax() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionAddProductidOverflow() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(response);
+    }
+
+    // CartAction remove tests.
+
+    @Test
+    public void test_R1_CartActionRemoveProductidZero() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionRemoveProductidMin() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=" + Integer.MIN_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionRemoveProductidUnderflow() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=" + (Integer.MIN_VALUE - 1));
+        assertNoServerError(response);
+    }
+
+    // Order endpoint tests.
+
+    @Test
+    public void test_R1_OrderConfirmEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_OrderConfirmNonPrintable() throws Exception {
+        String nonPrintable = "\u0000"; // Null character
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=" + nonPrintable);
+        assertNoServerError(response);
+    }
+
+}
+
+But wait, the order endpoint's path is "/tools.descartes.teastore.webui/order"? The original problem mentions POST /order, but the actual path may be different. However, the user's initial problem mentions the endpoints as:
+
+- GET /category
+- GET /product
+- POST /loginAction
+- POST /cartAction
+- POST /order
+
+But the actual path may be "/tools.descartes.teastore.webui/order", but in the code above, I used that.
+
+But the user's initial problem may have different paths. However, since the user hasn't provided the exact paths, but the initial example uses "/tools.descartes.teastore.webui/category", etc., I'll proceed with that.
+
+Now, the code includes tests for category, product, loginAction, cartAction (add and remove), and order.
+
+Now, the problem says to cover as many endpoints and mutation categories as possible. The above code includes:
+
+- For category id: null, empty, -1, max, overflow.
+- For product id: similar.
+- For loginAction: empty username, empty password, non-printable.
+- For cartAction add: 0, max, overflow.
+- For cartAction remove: 0, min, underflow.
+- For order: empty confirm, non-printable.
+
+That's a good coverage.
+
+Now, the code must be written in Java, with the correct package and class name.
+
+Also, the methods must be annotated with @Test.
+
+Now, the final code.
+...done thinking.
+
+```java
+package com.example;
+
+import org.junit.jupiter.api.Test;
+
+public class TeaStore_ModelC_Guided_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    public void test_R1_CategoryIdNull() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdEmpty() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdMinus1() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdMax() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CategoryIdOverflow() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdNull() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdEmpty() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdMinus1() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdMax() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdOverflow() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_LoginActionUsernameEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_LoginActionPasswordEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_LoginActionUsernameNonPrintable() throws Exception {
+        String nonPrintable = "\u0000";
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=" + nonPrintable + "&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_LoginActionPasswordNonPrintable() throws Exception {
+        String nonPrintable = "\u0000";
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=" + nonPrintable);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionAddProductidZero() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionAddProductidMax() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionAddProductidOverflow() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionRemoveProductidZero() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionRemoveProductidMin() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=" + Integer.MIN_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartActionRemoveProductidUnderflow() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=" + (Integer.MIN_VALUE - 1));
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_OrderConfirmEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_OrderConfirmNonPrintable() throws Exception {
+        String nonPrintable = "\u0000";
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=" + nonPrintable);
+        assertNoServerError(response);
+    }
+}
+```
+
