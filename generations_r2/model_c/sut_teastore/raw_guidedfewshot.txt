@@ -1,0 +1,364 @@
+Thinking...
+Okay, I need to create a JUnit 5 test class for the TeaStore microservice that covers robustness testing based on the given mutation rules. Let me start by understanding the requirements.
+
+First, the test class must be in the package com.example and named TeaStore_ModelC_GuidedFewShot_RobustnessTest. Each test method should start with test_R1_, throw Exception, and use get() or post() with mutated inputs, followed by assertNoServerError(). I shouldn't repeat the same mutation on the same parameter and must cover different endpoints and parameters.
+
+Looking at the available endpoints, there are GET and POST endpoints. The robustness tests need to apply mutations to each parameter based on their data types. For strings, mutations include null, empty, predefined strings, nonprintable characters, etc. For numbers, similar mutations but with numeric values.
+
+Let me list the endpoints and their parameters:
+
+1. GET /tools.descartes.teastore.webui/ – no parameters.
+2. GET /tools.descartes.teastore.webui/category?id=<integer> – id is an integer.
+3. GET /tools.descartes.teastore.webui/product?id=<integer> – id is an integer.
+4. GET /tools.descartes.teastore.webui/cart – no parameters.
+5. GET /tools.descartes.teastore.webui/profile – no parameters.
+6. POST /tools.descartes.teastore.webui/loginAction – username and password are strings.
+7. POST /tools.descartes.teastore.webui/cartAction – either addToCart or removeProduct, and productid is an integer.
+8. POST /tools.descartes.teastore.webui/order – confirm is a string.
+
+Now, I need to create tests for each of these endpoints, applying different mutations. Let's go through each one.
+
+For the GET endpoints with no parameters, like the root, cart, and profile, the only possible mutation is structural, like sending a request with no body (but since they are GET, there's no body). However, the examples show that for GET endpoints, the mutation is applied to the query parameters. For example, the category endpoint's id is mutated. So for endpoints without parameters, maybe there's not much to test. But the root endpoint doesn't take parameters, so maybe there's no mutation possible. However, the examples don't cover that. Maybe I can skip those or test for structural mutations like adding invalid query parameters, but the problem says to apply mutations to parameters of each service call. Since the root endpoint has no parameters, perhaps there's no test for it. Let me check the examples again. The examples include tests for category and product endpoints, which have parameters. So maybe the root, cart, and profile endpoints don't have parameters to mutate, so no tests for them. But the user might want to cover all endpoints. Alternatively, maybe for the cartAction endpoint, which has parameters, but the POST has two possible actions (addToCart and removeProduct) and productid.
+
+Let me start with the loginAction endpoint. The parameters are username and password, both strings. So for each of them, apply mutations like null, empty, nonprintable, etc. But the examples already have tests for nonprintable username and overflow username. So I need to cover other mutations for these parameters.
+
+For the cartAction endpoint, when adding to cart, the body is "addToCart=&productid=..." where productid is an integer. So for productid, apply number mutations. Similarly for removeProduct, which also has productid. The examples have tests for omitting the productid key and empty productid. So I need to cover other number mutations for productid.
+
+For the order endpoint, the confirm parameter is a string. So mutations like empty, nonprintable, etc.
+
+Let me think of possible tests:
+
+For loginAction:
+
+- Test_R1_login_nullUsername: username is null (but since it's a GET parameter, maybe omit the key? Wait, no, loginAction is a POST, so the body is form-urlencoded. So for the username parameter, to replace by null value, perhaps omit the key entirely. Wait, the mutation rules for string parameters include replacing by null value, which for form-urlencoded parameters would mean omitting the key. But the examples have test_R1_cartAdd_keyAbsentProductId, which omits the key. So for username, omitting the key would be a mutation. But the example for login_nonprintableUsername uses a nonprintable string. So for the username parameter, possible tests:
+
+- Omit username key (null value)
+- Empty username
+- Predefined string (like "testuser")
+- Nonprintable characters
+- Overflow length
+- Similarly for password.
+
+But the examples already have some of these. Let me check:
+
+The examples have test_R1_login_nonprintableUsername and test_R1_login_overflowUsername. So I need to cover other mutations for username and password.
+
+For example, test_R1_login_emptyUsername, test_R1_login_passwordEmpty, test_R1_login_passwordNull (omit password key), test_R1_login_passwordNonprintable, etc.
+
+Similarly, for the productid in cartAction, when adding to cart, the productid is an integer. So for that, mutations like -1, 0, Integer.MAX_VALUE, etc.
+
+For the order endpoint's confirm parameter, which is a string, test with empty, nonprintable, etc.
+
+Also, the category and product endpoints have id parameters. For those, test with various number mutations like -1, empty, 0, etc.
+
+Let me list the tests I can create:
+
+1. Test_R1_category_idMaxValue: id=Integer.MAX_VALUE
+2. Test_R1_category_idMinValue: id=Integer.MIN_VALUE
+3. Test_R1_category_idOverflow: id=Integer.MAX_VALUE +1
+4. Test_R1_category_idUnderflow: id=Integer.MIN_VALUE -1
+5. Test_R1_category_idZero: id=0
+6. Test_R1_category_idEmpty: id= (empty string)
+7. Test_R1_category_idAbsent: omit the id parameter (structural mutation)
+8. Test_R1_product_idMaxValue: same as category
+9. Test_R1_product_idMinValue
+10. Test_R1_product_idOverflow
+11. Test_R1_product_idUnderflow
+12. Test_R1_product_idZero
+13. Test_R1_product_idEmpty
+14. Test_R1_product_idAbsent
+
+For loginAction:
+
+15. Test_R1_login_emptyUsername: username=""
+16. Test_R1_login_passwordEmpty: password=""
+17. Test_R1_login_passwordNull: omit password key
+18. Test_R1_login_passwordNonprintable: password with nonprintable
+19. Test_R1_login_passwordOverflow: password with 5000 characters
+20. Test_R1_login_usernameNull: omit username key
+21. Test_R1_login_usernamePredefined: username="predefined"
+
+For cartAction (addToCart):
+
+22. Test_R1_cartAdd_productidMaxValue
+23. Test_R1_cartAdd_productidMinValue
+24. Test_R1_cartAdd_productidOverflow
+25. Test_R1_cartAdd_productidUnderflow
+26. Test_R1_cartAdd_productidZero
+27. Test_R1_cartAdd_productidEmpty
+28. Test_R1_cartAdd_productidAbsent (but the example already has test_R1_cartAdd_keyAbsentProductId, which is the same as this. So maybe avoid repeating.)
+
+For cartAction (removeProduct):
+
+29. Test_R1_cartRemove_productidMaxValue
+30. Test_R1_cartRemove_productidMinValue
+31. Test_R1_cartRemove_productidOverflow
+32. Test_R1_cartRemove_productidUnderflow
+33. Test_R1_cartRemove_productidZero
+34. Test_R1_cartRemove_productidEmpty
+35. Test_R1_cartRemove_productidAbsent (but example has test_R1_cartRemove_emptyProductId which is productid=, so maybe that's covered.)
+
+For order endpoint:
+
+36. Test_R1_order_confirmEmpty: confirm=""
+37. Test_R1_order_confirmNonprintable: confirm with nonprintable
+38. Test_R1_order_confirmOverflow: confirm with 5000 characters
+39. Test_R1_order_confirmNull: omit confirm key (but the body is "confirm=", so omitting the key would be "confirm=" with no value? Or the key is present but value is empty. Wait, the order endpoint's body is "confirm=", so the parameter is confirm. To mutate, perhaps replace the value with empty, or omit the key. For example, sending "confirm=" (value empty) or omitting the key entirely. But the example for cartAdd_keyAbsentProductId omits the key. So for order, maybe test_R1_order_confirmAbsent: omit the confirm key. But the body would be empty? Or is the confirm parameter required? The example for cartAdd_keyAbsentProductId has the body as "addToCart=", which is the key present but no value. But for the order endpoint, the body is "confirm=". If the key is omitted, the body would be empty. So maybe test_R1_order_confirmAbsent: send empty body.
+
+But the problem says that each test applies exactly one mutation rule. So for the order endpoint's confirm parameter, possible mutations include omitting the key (structural mutation), empty value, etc.
+
+So for the order endpoint:
+
+- Test_R1_order_confirmEmpty: confirm=""
+- Test_R1_order_confirmAbsent: omit confirm key (so body is empty)
+- Test_R1_order_confirmNonprintable: confirm with nonprintable
+- Test_R1_order_confirmOverflow: long string
+- Test_R1_order_confirmPredefined: confirm="test"
+
+Now, I need to make sure that each test is unique and covers different parameters and mutations. Also, avoid repeating the same mutation on the same parameter.
+
+Let me proceed to write these tests, ensuring that each one is unique and follows the examples.
+
+For example, the category endpoint's id can be mutated with various number mutations. Similarly for product. For the loginAction, username and password can be mutated with various string mutations. The cartAction's productid can be mutated with number mutations. The order's confirm can be mutated with string mutations.
+
+I'll need to generate all these tests, making sure that each test method has a unique name starting with test_R1_, and that each applies a different mutation rule.
+
+Now, let's write the code for each test.
+...done thinking.
+
+package com.example;
+
+import org.junit.jupiter.api.Test;
+import java.net.http.HttpResponse;
+
+public class TeaStore_ModelC_GuidedFewShot_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    void test_R1_category_idMaxValue() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/category?id=" + Integer.MAX_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_category_idMinValue() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/category?id=" + Integer.MIN_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_category_idOverflow() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/category?id=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_category_idUnderflow() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/category?id=" + (Integer.MIN_VALUE - 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_category_idZero() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/category?id=0");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_category_idEmpty() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/category?id=");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_category_idAbsent() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/category");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_product_idMaxValue() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/product?id=" + Integer.MAX_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_product_idMinValue() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/product?id=" + Integer.MIN_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_product_idOverflow() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/product?id=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_product_idUnderflow() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/product?id=" + (Integer.MIN_VALUE - 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_product_idZero() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/product?id=0");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_product_idEmpty() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/product?id=");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_product_idAbsent() throws Exception {
+        HttpResponse<String> r = get("/tools.descartes.teastore.webui/product");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_login_emptyUsername() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/login", "username=&password=test");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_login_passwordEmpty() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/login", "username=test&password=");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_login_passwordNull() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/login", "username=test");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_login_passwordNonprintable() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/login", "username=test&password=\u0000");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_login_passwordOverflow() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/login", "username=test&password=" + "a".repeat(5000));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_login_usernameNull() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/login", "password=test");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_login_usernamePredefined() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/login", "username=predefined&password=test");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartAdd_productidMaxValue() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "addToCart=&productid=" + Integer.MAX_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartAdd_productidMinValue() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "addToCart=&productid=" + Integer.MIN_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartAdd_productidOverflow() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "addToCart=&productid=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartAdd_productidUnderflow() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "addToCart=&productid=" + (Integer.MIN_VALUE - 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartAdd_productidZero() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "addToCart=&productid=0");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartAdd_productidEmpty() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "addToCart=&productid=");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartRemove_productidMaxValue() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "removeProduct=&productid=" + Integer.MAX_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartRemove_productidMinValue() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "removeProduct=&productid=" + Integer.MIN_VALUE);
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartRemove_productidOverflow() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "removeProduct=&productid=" + (Integer.MAX_VALUE + 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartRemove_productidUnderflow() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "removeProduct=&productid=" + (Integer.MIN_VALUE - 1));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartRemove_productidZero() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "removeProduct=&productid=0");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_cartRemove_productidEmpty() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/cart", "removeProduct=&productid=");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_order_confirmEmpty() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_order_confirmNonprintable() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/order", "confirm=\u0000");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_order_confirmOverflow() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/order", "confirm=" + "a".repeat(5000));
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_order_confirmAbsent() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/order", "");
+        assertNoServerError(r);
+    }
+
+    @Test
+    void test_R1_order_confirmPredefined() throws Exception {
+        HttpResponse<String> r = post("/tools.descartes.teastore.webui/order", "confirm=test");
+        assertNoServerError(r);
+    }
+}
+

@@ -1,0 +1,107 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class TeaStore_ModelD_Structured_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    public void test_R1_categoryNegativeId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_categoryZeroId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_categoryNonIntegerId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=abc");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_categoryMissingId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_categoryLargeId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=999999999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_productNegativeId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_productNonIntegerId() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=abc");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_loginActionEmptyUsername() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_loginActionSqlInjectionPayload() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=' OR '1'='1&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_loginActionLongUsername() {
+        StringBuilder longString = new StringBuilder("a".repeat(5000));
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=" + longString.toString() + "&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_loginActionNullPassword() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_cartActionNonExistentProductIdAddToCart() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=999999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_cartActionNegativeProductIdAddToCart() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_cartActionNonExistentProductIdRemoveProduct() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=999999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_orderUnauthenticatedAccess() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", "confirm=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_unknownEndpoint() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/unknown");
+        assertNoServerError(response);
+    }
+}
+```
+

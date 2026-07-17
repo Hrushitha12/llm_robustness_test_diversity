@@ -1,0 +1,304 @@
+Thinking...
+Okay, I need to create a JUnit 5 test class for the TeaStore microservice's robustness. The user specified that the class should be in the package com.example and named TeaStore_ModelC_ZeroShot_RobustnessTest. Each test method must start with test_R1_ and there should be between 15 to 18 tests. Each test should call get() or post() with some input and then use assertNoServerError().
+
+First, I should think about the available endpoints and what kind of inputs could cause issues. Let's list the endpoints again:
+
+GET /tools.descartes.teastore.webui/
+GET /tools.descartes.teastore.webui/category?id=<integer>
+GET /tools.descartes.teastore.webui/product?id=<integer>
+GET /tools.descartes.teastore.webui/cart
+GET /tools.descartes.teastore.webui/profile
+POST /tools.descartes.teastore.webui/loginAction with username and password
+POST /tools.descartes.teastore.webui/cartAction for adding or removing products
+POST /tools.descartes.teastore.webui/order to confirm
+
+For robustness tests, I need to test invalid or unexpected inputs. Let's brainstorm possible test cases:
+
+1. Test the main page (GET /) to ensure it's accessible.
+2. Test GET /category with invalid ID (like non-integer, negative, zero, or very large).
+3. Test GET /product with similar invalid IDs.
+4. Test GET /cart when not logged in (should maybe return 302 or 401?).
+5. Test GET /profile when not logged in (same as above).
+6. Test POST /loginAction with invalid credentials (should return 401?).
+7. Test POST /loginAction with missing parameters.
+8. Test POST /cartAction with invalid product IDs (like negative, zero, non-integer).
+9. Test POST /cartAction with invalid action parameters (like not addToCart or removeProduct).
+10. Test POST /order without proper session or when cart is empty.
+11. Test GET /category with missing id parameter.
+12. Test GET /product with missing id parameter.
+13. Test POST /cartAction with missing productid.
+14. Test POST /loginAction with empty username or password.
+15. Test POST /order with invalid parameters (though the body is just confirm=, maybe test with other parameters?).
+16. Test GET /cart with invalid session (but how to simulate that? Maybe just call it without logging in).
+17. Test POST /cartAction with non-integer productid in the body.
+18. Test GET /profile with invalid session (again, maybe just call it without logging in).
+
+Now, I need to map these ideas into actual test methods. Each test method must have a unique name starting with test_R1_. Let's count:
+
+1. test_R1_GetMainPage
+2. test_R1_GetCategoryInvalidIdNegative
+3. test_R1_GetCategoryInvalidIdZero
+4. test_R1_GetCategoryInvalidIdNonInteger
+5. test_R1_GetCategoryInvalidIdLarge
+6. test_R1_GetProductInvalidIdNegative
+7. test_R1_GetProductInvalidIdZero
+8. test_R1_GetProductInvalidIdNonInteger
+9. test_R1_GetProductInvalidIdLarge
+10. test_R1_GetCartWithoutLogin
+11. test_R1_GetProfileWithoutLogin
+12. test_R1_LoginInvalidCredentials
+13. test_R1_LoginMissingParameters
+14. test_R1_CartActionAddInvalidProductIdNegative
+15. test_R1_CartActionAddInvalidProductIdZero
+16. test_R1_CartActionAddInvalidProductIdNonInteger
+17. test_R1_CartActionAddInvalidProductIdLarge
+18. test_R1_CartActionRemoveInvalidProductIdNegative
+... and so on. Wait, that's already 18 tests. Let me check if I can cover all the endpoints and edge cases.
+
+For the GET category and product, testing various invalid IDs. For POST cartAction, adding and removing with invalid product IDs. Also, testing missing parameters in POST requests.
+
+Another test could be for POST /loginAction with empty username or password. Also, testing POST /order with invalid parameters (though the body is just confirm=, but maybe sending other parameters? Or maybe testing without logging in?).
+
+Also, testing GET /category and /product with missing id parameter. For example, the URL would be /category without the id query parameter. Similarly for product.
+
+So let's structure the tests:
+
+Test 1: GET / (main page)
+Test 2: GET /category?id=-1 (negative)
+Test 3: GET /category?id=0
+Test 4: GET /category?id=abc (non-integer)
+Test 5: GET /category?id=1000000000 (large)
+Test 6: GET /product?id=-1
+Test 7: GET /product?id=0
+Test 8: GET /product?id=abc
+Test 9: GET /product?id=1000000000
+Test 10: GET /cart without login
+Test 11: GET /profile without login
+Test 12: POST /loginAction with invalid username and password
+Test 13: POST /loginAction missing username and password
+Test 14: POST /cartAction addToCart with invalid productid -1
+Test 15: POST /cartAction addToCart with productid 0
+Test 16: POST /cartAction addToCart with productid abc
+Test 17: POST /cartAction addToCart with productid 1000000000
+Test 18: POST /cartAction removeProduct with productid -1
+Test 19: POST /cartAction removeProduct with productid 0
+Test 20: POST /cartAction removeProduct with productid abc
+Test 21: POST /cartAction removeProduct with productid 1000000000
+Test 22: POST /order with confirm= but not logged in
+Test 23: POST /loginAction with empty username
+Test 24: POST /loginAction with empty password
+Test 25: GET /category without id parameter
+Test 26: GET /product without id parameter
+Test 27: POST /cartAction addToCart missing productid
+Test 28: POST /cartAction removeProduct missing productid
+
+Wait, but the user asked for 15-18 tests. So maybe I need to select 15-18 from these possibilities.
+
+Let me pick 18 tests. Let's see:
+
+1. Get main page
+2. Get category with invalid id (negative)
+3. Get category with id zero
+4. Get category with non-integer id
+5. Get category with very large id
+6. Get product with invalid id (negative)
+7. Get product with id zero
+8. Get product with non-integer id
+9. Get product with very large id
+10. Get cart without login
+11. Get profile without login
+12. Login with invalid credentials
+13. Login missing parameters
+14. Cart add with invalid productid negative
+15. Cart add with productid zero
+16. Cart add with non-integer productid
+17. Cart add with very large productid
+18. Cart remove with invalid productid negative
+
+That's 18 tests. Each of these would be a test method. Now, I need to write the code for each.
+
+For the GET requests, the path is constructed with the query parameters. For example, for category with id=-1, the path is "/tools.descartes.teastore.webui/category?id=-1".
+
+For POST requests, the body is constructed as a string with the parameters. For example, loginAction would have "username=invalid&password=invalid".
+
+Each test method calls get() or post() with the appropriate path and body, then calls assertNoServerError().
+
+Now, considering the imports, the user said to import only from java.net.http and org.junit.jupiter.api. So I need to make sure that the HttpResponse is from java.net.http, and the JUnit annotations are from org.junit.jupiter.api.
+
+Also, the test class must extend TeaStoreBaseTest, which provides the get and post methods and the assertNoServerError method.
+
+Now, writing the code:
+
+The class will be in package com.example.
+
+Each test method is a @Test method with the name test_R1_ followed by a number and description.
+
+For example:
+
+@Test
+void test_R1_GetMainPage() {
+    HttpResponse<String> response = get("/tools.descartes.teastore.webui/");
+    assertNoServerError(response);
+}
+
+Similarly for other tests.
+
+For the POST requests, for example, loginAction with invalid credentials:
+
+@Test
+void test_R1_LoginInvalidCredentials() {
+    HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=invalid&password=invalid");
+    assertNoServerError(response);
+}
+
+For missing parameters in POST, like loginAction without username and password:
+
+@Test
+void test_R1_LoginMissingParameters() {
+    HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "");
+    assertNoServerError(response);
+}
+
+For cartAction add with invalid productid:
+
+@Test
+void test_R1_CartActionAddInvalidProductIdNegative() {
+    HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=-1");
+    assertNoServerError(response);
+}
+
+Similarly for zero, non-integer, large, etc.
+
+For GET without id parameter:
+
+@Test
+void test_R1_GetCategoryMissingId() {
+    HttpResponse<String> response = get("/tools.descartes.teastore.webui/category");
+    assertNoServerError(response);
+}
+
+Same for product.
+
+Now, making sure that all test methods are covered and that the names are unique and start with test_R1_.
+
+Also, checking that each test calls get() or post() and then assertNoServerError().
+
+I think that's all. Now, I need to code this into the Java class.
+...done thinking.
+
+package com.example;
+
+import org.junit.jupiter.api.Test;
+import java.net.http.HttpResponse;
+
+public class TeaStore_ModelC_ZeroShot_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    void test_R1_GetMainPage() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryInvalidIdNegative() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryInvalidIdZero() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryInvalidIdNonInteger() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=abc");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCategoryInvalidIdLarge() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=1000000000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductInvalidIdNegative() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductInvalidIdZero() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductInvalidIdNonInteger() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=abc");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductInvalidIdLarge() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=1000000000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCartWithoutLogin() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProfileWithoutLogin() {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/profile");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginInvalidCredentials() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=invalid&password=invalid");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_LoginMissingParameters() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_CartActionAddInvalidProductIdNegative() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_CartActionAddInvalidProductIdZero() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_CartActionAddInvalidProductIdNonInteger() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=abc");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_CartActionAddInvalidProductIdLarge() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=1000000000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_CartActionRemoveInvalidProductIdNegative() {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "removeProduct=&productid=-1");
+        assertNoServerError(response);
+    }
+}
+
