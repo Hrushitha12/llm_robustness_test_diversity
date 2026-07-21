@@ -1,0 +1,53 @@
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class TeaStore_ModelE_Guided_R2_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    public void test_R1_emptyStringInCategoryGET() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R2_nullValueInProductGET() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R3_nonPrintableCharactersInUsernamePOST() throws Exception {
+        String body = "username=\u0001\u0002\u0003&password=valid";
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_integerOverflowInProductPOST() throws Exception {
+        String body = "addToCart=&productid=" + Integer.MAX_VALUE;
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_underflowInCategoryIdGET() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R6_alphanumericStringInProductIdPOST() throws Exception {
+        String body = "removeProduct=&productid=abc123";
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R7_invalidBodyInOrderPOST() throws Exception {
+        String body = "\u0001\u0002\u0003";
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/order", body);
+        assertNoServerError(response);
+    }
+}
