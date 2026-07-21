@@ -1,0 +1,171 @@
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+class TeaStore_ModelD_Guided_R2_RobustnessTest extends TeaStoreBaseTest {
+
+    @Test
+    void test_R1_categoryIdNull() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_categoryIdEmpty() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_categoryIdNegativeOne() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_categoryIdZero() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_categoryIdOne() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_categoryIdMaxInt() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/category?id=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_productIdNull() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_productIdEmpty() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_productIdNegativeOne() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_productIdZero() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_productIdOne() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_productIdMaxInt() throws Exception {
+        HttpResponse<String> response = get("/tools.descartes.teastore.webui/product?id=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionUsernameNull() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionUsernameEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionUsernameNonPrintable() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=\u0000&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionUsernameOverflow() throws Exception {
+        StringBuilder longString = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            longString.append("a");
+        }
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=" + longString.toString() + "&password=test");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionPasswordNull() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionPasswordEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionPasswordNonPrintable() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_loginActionPasswordOverflow() throws Exception {
+        StringBuilder longString = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            longString.append("a");
+        }
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/loginAction", "username=test&password=" + longString.toString());
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_cartActionProductIdNull() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_cartActionProductIdEmpty() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_cartActionProductIdNegativeOne() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=-1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_cartActionProductIdZero() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=0");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_cartActionProductIdOne() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=1");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_cartActionProductIdMaxInt() throws Exception {
+        HttpResponse<String> response = post("/tools.descartes.teastore.webui/cartAction", "addToCart=&productid=" + Integer.MAX_VALUE);
+        assertNoServerError(response);
+    }
+}
