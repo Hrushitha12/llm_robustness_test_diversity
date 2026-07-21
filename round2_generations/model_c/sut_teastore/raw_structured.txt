@@ -302,7 +302,7 @@ package com.example;
 import org.junit.jupiter.api.Test;
 import java.net.http.HttpResponse;
 
-public class TeaStore_ModelC_Structured_RobustnessTest extends TeaStoreBaseTest {
+public class TeaStore_ModelC_Structured_R2_RobustnessTest extends TeaStoreBaseTest {
 
     @Test
     void test_R1_CategoryNegativeId() {
