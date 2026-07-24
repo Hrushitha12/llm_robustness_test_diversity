@@ -8,6 +8,7 @@ com\example\OTelShop_ModelE_CoT_RobustnessTest.class
 com\example\OTelShop_ModelD_Structured_RobustnessTest.class
 com\example\OTelShop_ModelC_FewShot_RobustnessTest.class
 com\example\OTelShop_ModelD_FewShot_RobustnessTest.class
+com\example\OTelShop_ModelE_CoT_R2_RobustnessTest.class
 com\example\OTelShop_ModelD_Self_RobustnessTest.class
 com\example\OTelShop_ModelC_GuidedFewShot_RobustnessTest.class
 com\example\OTelShop_ModelE_Guided_RobustnessTest.class
@@ -18,6 +19,7 @@ com\example\OTelShop_ModelC_Structured_R2_RobustnessTest.class
 com\example\OTelShop_ModelE_Structured_R2_RobustnessTest.class
 com\example\OTelShop_ModelC_Structured_RobustnessTest.class
 com\example\OTelShop_ModelE_Self_RobustnessTest.class
+com\example\OTelShop_ModelD_CoT_R2_RobustnessTest.class
 com\example\OTelShop_ModelC_Guided_RobustnessTest.class
 com\example\OTelShop_ModelE_Structured_RobustnessTest.class
 com\example\OTelShopBaseTest.class
