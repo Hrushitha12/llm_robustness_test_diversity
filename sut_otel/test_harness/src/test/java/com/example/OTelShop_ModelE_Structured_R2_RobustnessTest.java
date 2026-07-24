@@ -1,0 +1,151 @@
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+public class OTelShop_ModelE_Structured_R2_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_01_nonExistentProductId() throws Exception {
+        HttpResponse<String> response = get("/api/products/DOESNOTEXIST999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_02_emptyStringSegmentInPath() throws Exception {
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_03_numericStringAsId() throws Exception {
+        HttpResponse<String> response = get("/api/products/12345");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_04_extremelyLongIdString() throws Exception {
+        StringBuilder id = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            id.append("a");
+        }
+        HttpResponse<String> response = get("/api/products/" + id.toString());
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R2_01_emptySessionIdQueryParam() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R2_02_sessionIdMissingFromQuery() throws Exception {
+        HttpResponse<String> response = get("/api/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R3_01_emptySessionIdQueryParam() throws Exception {
+        HttpResponse<String> response = delete("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_01_userIdFieldIsEmptyString() throws Exception {
+        String jsonBody = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_02_productIdFieldIsEmptyString() throws Exception {
+        String jsonBody = "{\"userId\":\"test-user\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_03_quantityIsZero() throws Exception {
+        String jsonBody = "{\"userId\":\"test-user\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_04_quantityIsNegativeInteger() throws Exception {
+        String jsonBody = "{\"userId\":\"test-user\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R4_05_itemFieldIsNull() throws Exception {
+        String jsonBody = "{\"userId\":\"test-user\",\"item\":null}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_01_emptyUserId() throws Exception {
+        String jsonBody = "{\"userId\":\"\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"email\":\"\",\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2022,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_02_invalidNonExistentCurrencyCode() throws Exception {
+        String jsonBody = "{\"userId\":\"test-user\",\"userCurrency\":\"ZZZ\",\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"email\":\"\",\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2022,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_03_creditCardNumberIsEmptyString() throws Exception {
+        String jsonBody = "{\"userId\":\"test-user\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"email\":\"\",\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2022,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R5_04_creditCardExpirationYearIsInThePast() throws Exception {
+        String jsonBody = "{\"userId\":\"test-user\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"email\":\"\",\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2000,\"creditCardExpirationMonth\":1}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R6_01_unknownFromCodeCurrency() throws Exception {
+        String jsonBody = "{\"from\":{\"currencyCode\":\"ZZZ\",\"units\":10,\"nanos\":0},\"toCode\":\"USD\"}";
+        HttpResponse<String> response = postJson("/api/currency", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R6_02_unknownToCodeCurrency() throws Exception {
+        String jsonBody = "{\"from\":{\"currencyCode\":\"USD\",\"units\":10,\"nanos\":0},\"toCode\":\"ZZZ\"}";
+        HttpResponse<String> response = postJson("/api/currency", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R6_03_unitsFieldIsNegative() throws Exception {
+        String jsonBody = "{\"from\":{\"currencyCode\":\"USD\",\"units\":-1,\"nanos\":0},\"toCode\":\"EUR\"}";
+        HttpResponse<String> response = postJson("/api/currency", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R7_01_allAddressFieldsEmptyStrings() throws Exception {
+        String jsonBody = "{\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}";
+        HttpResponse<String> response = postJson("/api/shipping", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R8_01_nonExistentProductIdsValue() throws Exception {
+        HttpResponse<String> response = get("/api/recommendations?productIds=FAKE999&sessionId=s1&currencyCode=USD");
+        assertNoServerError(response);
+    }
+}
