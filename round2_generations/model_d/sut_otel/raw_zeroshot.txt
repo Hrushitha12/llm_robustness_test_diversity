@@ -1,0 +1,80 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelD_ZeroShot_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    void test_R1_InvalidProductIdInGetProduct() throws Exception {
+        assertNoServerError(get("/api/products/INVALID_ID"));
+    }
+
+    @Test
+    void test_R1_MissingSessionIdInGetCart() throws Exception {
+        assertNoServerError(get("/api/cart"));
+    }
+
+    @Test
+    void test_R1_EmptyBodyInPostAddToCart() throws Exception {
+        assertNoServerError(postJson("/api/cart", ""));
+    }
+
+    @Test
+    void test_R1_InvalidUserIdInPostAddToCart() throws Exception {
+        assertNoServerError(postJson("/api/cart", "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}"));
+    }
+
+    @Test
+    void test_R1_NegativeQuantityInPostAddToCart() throws Exception {
+        assertNoServerError(postJson("/api/cart", "{\"userId\":\"user123\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}"));
+    }
+
+    @Test
+    void test_R1_MissingSessionIdInDeleteCart() throws Exception {
+        assertNoServerError(delete("/api/cart"));
+    }
+
+    @Test
+    void test_R1_EmptyBodyInPostCheckout() throws Exception {
+        assertNoServerError(postJson("/api/checkout", ""));
+    }
+
+    @Test
+    void test_R1_InvalidEmailInPostCheckout() throws Exception {
+        assertNoServerError(postJson("/api/checkout", "{\"userId\":\"user123\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"email\":\"invalid-email\",\"creditCard\":{\"creditCardNumber\":\"1234567812345678\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}"));
+    }
+
+    @Test
+    void test_R1_InvalidCreditCardInPostCheckout() throws Exception {
+        assertNoServerError(postJson("/api/checkout", "{\"userId\":\"user123\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"invalid\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}"));
+    }
+
+    @Test
+    void test_R1_EmptyBodyInPostCurrencyConversion() throws Exception {
+        assertNoServerError(postJson("/api/currency", ""));
+    }
+
+    @Test
+    void test_R1_InvalidFromCurrencyCodeInPostCurrencyConversion() throws Exception {
+        assertNoServerError(postJson("/api/currency", "{\"from\":{\"currencyCode\":\"INVALID\",\"units\":100,\"nanos\":0},\"toCode\":\"USD\"}"));
+    }
+
+    @Test
+    void test_R1_EmptyBodyInPostShippingCost() throws Exception {
+        assertNoServerError(postJson("/api/shipping", ""));
+    }
+
+    @Test
+    void test_R1_MissingStreetAddressInPostShippingCost() throws Exception {
+        assertNoServerError(postJson("/api/shipping", "{\"address\":{\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}"));
+    }
+
+    @Test
+    void test_R1_InvalidProductIdsInGetRecommendations() throws Exception {
+        assertNoServerError(get("/api/recommendations?productIds=INVALID_ID&sessionId=session123&currencyCode=USD"));
+    }
+}
+```
+

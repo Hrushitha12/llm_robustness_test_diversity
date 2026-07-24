@@ -1,0 +1,160 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelD_Self_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_GetNonExistentProduct() throws Exception {
+        get("/api/products/nonexistentid");
+    }
+
+    @Test
+    public void test_R1_GetInvalidProductIdFormat() throws Exception {
+        get("/api/products/12345");
+    }
+
+    @Test
+    public void test_R1_GetProductsPathEdgeCase() throws Exception {
+        get("/api/products/");
+    }
+
+    @Test
+    public void test_R1_GetCartMissingSessionId() throws Exception {
+        get("/api/cart?");
+    }
+
+    @Test
+    public void test_R1_GetCartEmptySessionId() throws Exception {
+        get("/api/cart?sessionId=");
+    }
+
+    @Test
+    public void test_R1_DeleteCartMissingSessionId() throws Exception {
+        delete("/api/cart?");
+    }
+
+    @Test
+    public void test_R1_DeleteCartEmptySessionId() throws Exception {
+        delete("/api/cart?sessionId=");
+    }
+
+    @Test
+    public void test_R1_PostCartEmptyUserId() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2}}");
+    }
+
+    @Test
+    public void test_R1_PostCartEmptyProductId() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"user1\",\"item\":{\"productId\":\"\",\"quantity\":2}}");
+    }
+
+    @Test
+    public void test_R1_PostCartNullItem() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"user1\",\"item\":null}");
+    }
+
+    @Test
+    public void test_R1_PostCartMissingFields() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"user1\"}");
+    }
+
+    @Test
+    public void test_R1_PostCartZeroQuantity() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"user1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}");
+    }
+
+    @Test
+    public void test_R1_PostCartNegativeQuantity() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"user1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}");
+    }
+
+    @Test
+    public void test_R1_PostCartVeryLargeQuantity() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"user1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":999999999}}");
+    }
+
+    @Test
+    public void test_R1_PostCartNonExistentProductId() throws Exception {
+        postJson("/api/cart", "{\"userId\":\"user1\",\"item\":{\"productId\":\"nonexistentid\",\"quantity\":2}}");
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyUserId() throws Exception {
+        postJson("/api/checkout", "{\"userId\":\"\",\"userCurrency\":\"USD\", \"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"}, \"email\":\"test@example.com\", \"creditCard\":{\"creditCardNumber\":\"1234567812345678\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}");
+    }
+
+    @Test
+    public void test_R1_CheckoutInvalidCurrencyCode() throws Exception {
+        postJson("/api/checkout", "{\"userId\":\"user1\",\"userCurrency\":\"XYZ\", \"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"}, \"email\":\"test@example.com\", \"creditCard\":{\"creditCardNumber\":\"1234567812345678\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}");
+    }
+
+    @Test
+    public void test_R1_CheckoutEmptyCreditCardNumber() throws Exception {
+        postJson("/api/checkout", "{\"userId\":\"user1\",\"userCurrency\":\"USD\", \"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"}, \"email\":\"test@example.com\", \"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}");
+    }
+
+    @Test
+    public void test_R1_CheckoutExpiredCreditCardYear() throws Exception {
+        postJson("/api/checkout", "{\"userId\":\"user1\",\"userCurrency\":\"USD\", \"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"}, \"email\":\"test@example.com\", \"creditCard\":{\"creditCardNumber\":\"1234567812345678\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2020,\"creditCardExpirationMonth\":12}}");
+    }
+
+    @Test
+    public void test_R1_CheckoutOutOfRangeCreditCardMonth() throws Exception {
+        postJson("/api/checkout", "{\"userId\":\"user1\",\"userCurrency\":\"USD\", \"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"}, \"email\":\"test@example.com\", \"creditCard\":{\"creditCardNumber\":\"1234567812345678\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":13}}");
+    }
+
+    @Test
+    public void test_R1_CheckoutMissingAddressFields() throws Exception {
+        postJson("/api/checkout", "{\"userId\":\"user1\",\"userCurrency\":\"USD\", \"address\":{\"streetAddress\":\"\"}, \"email\":\"test@example.com\", \"creditCard\":{\"creditCardNumber\":\"1234567812345678\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}");
+    }
+
+    @Test
+    public void test_R1_CurrencyUnknownFromCode() throws Exception {
+        postJson("/api/currency", "{\"from\":{\"currencyCode\":\"XYZ\",\"units\":100,\"nanos\":0},\"toCode\":\"USD\"}");
+    }
+
+    @Test
+    public void test_R1_CurrencyUnknownToCode() throws Exception {
+        postJson("/api/currency", "{\"from\":{\"currencyCode\":\"USD\",\"units\":100,\"nanos\":0},\"toCode\":\"XYZ\"}");
+    }
+
+    @Test
+    public void test_R1_CurrencyNegativeUnits() throws Exception {
+        postJson("/api/currency", "{\"from\":{\"currencyCode\":\"USD\",\"units\":-100,\"nanos\":0},\"toCode\":\"EUR\"}");
+    }
+
+    @Test
+    public void test_R1_ShippingEmptyItemsList() throws Exception {
+        postJson("/api/shipping", "{\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"}, \"items\":[]}");
+    }
+
+    @Test
+    public void test_R1_ShippingNonExistentProductIdInItems() throws Exception {
+        postJson("/api/shipping", "{\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"}, \"items\":[{\"productId\":\"nonexistentid\",\"quantity\":2}]}");
+    }
+
+    @Test
+    public void test_R1_ShippingEmptyAddressFields() throws Exception {
+        postJson("/api/shipping", "{\"address\":{\"streetAddress\":\"\"}, \"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":2}]}");
+    }
+
+    @Test
+    public void test_R1_RecommendationsUnknownCurrencyCode() throws Exception {
+        get("/api/recommendations?productIds=OLJCESPC7Z&sessionId=user1&currencyCode=XYZ");
+    }
+
+    @Test
+    public void test_R1_RecommendationsNonExistentProductId() throws Exception {
+        get("/api/recommendations?productIds=nonexistentid&sessionId=user1&currencyCode=USD");
+    }
+
+    @Test
+    public void test_R1_AdsEmptyContextKeys() throws Exception {
+        get("/api/ads?contextKeys=");
+    }
+}
+```
+

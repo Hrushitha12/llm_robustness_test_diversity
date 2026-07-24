@@ -1,0 +1,689 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelD_GuidedFewShot_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_ProductsNullId() throws Exception {
+        // String mutation: replace by null value (not applicable for path variable, but can be tested as empty)
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptyId() throws Exception {
+        // String mutation: replace by empty string
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNonprintableId() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        HttpResponse<String> response = get("/api/products/\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsOverflowId() throws Exception {
+        // String mutation: add characters to overflow the maximum expected size
+        StringBuilder longId = new StringBuilder("A").append("B".repeat(1000));
+        HttpResponse<String> response = get("/api/products/" + longId.toString());
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartNullSessionId() throws Exception {
+        // String mutation: replace by null value (not applicable for query param, but can be tested as empty)
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartEmptySessionId() throws Exception {
+        // String mutation: replace by empty string
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartNonprintableSessionId() throws Exception {
+        // String mutation: add nonprintable characters to the string
+        HttpResponse<String> response = get("/api/cart?sessionId=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartPredefinedStringSessionId() throws Exception {
+        // String mutation: replace by predefined string (unrelated to parameter)
+        HttpResponse<String> response = get("/api/cart?sessionId=UNRELATED_STRING");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddFieldAbsentUserId() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddFieldNullUserId() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":null,\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddFieldEmptyUserId() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddFieldNullItem() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":\"user-1\",\"item\":null}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddEmptyProductId() throws Exception {
+        // String mutation: replace by empty string
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddNegativeQuantity() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddZeroQuantity() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartAddOverflowQuantity() throws Exception {
+        // Number mutation: replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2147483647}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_DeleteCartNullSessionId() throws Exception {
+        // String mutation: replace by null value (not applicable for query param, but can be tested as empty)
+        HttpResponse<String> response = delete("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_DeleteCartEmptySessionId() throws Exception {
+        // String mutation: replace by empty string
+        HttpResponse<String> response = delete("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldAbsentUserId() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldNullUserId() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":null,\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldEmptyUserId() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"userId\":\"\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldAbsentUserCurrency() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"userId\":\"user-1\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldNullUserCurrency() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":null,\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldEmptyUserCurrency() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldNullAddress() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":null,\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldEmptyEmail() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldNullCreditCard() throws Exception {
+        // Structural mutation: send null where object is expected
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":null}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldEmptyCreditCardNumber() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldNegativeCreditCardCvv() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":-1,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldZeroCreditCardCvv() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":0,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldNegativeCreditCardExpirationYear() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":-1,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutFieldNegativeCreditCardExpirationMonth() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":-1}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CurrencyNullFrom() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"to\":\"EUR\",\"amount\":100}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CurrencyEmptyFrom() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"from\":\"\",\"to\":\"EUR\",\"amount\":100}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CurrencyNullTo() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"from\":\"USD\",\"amount\":100}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CurrencyEmptyTo() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"from\":\"USD\",\"to\":\"\",\"amount\":100}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CurrencyNegativeAmount() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"from\":\"USD\",\"to\":\"EUR\",\"amount\":-1}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CurrencyZeroAmount() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"from\":\"USD\",\"to\":\"EUR\",\"amount\":0}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_RecommendationsNullProductId() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"limit\":5}";
+        HttpResponse<String> response = postJson("/api/recommendations", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_RecommendationsEmptyProductId() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"productId\":\"\",\"limit\":5}";
+        HttpResponse<String> response = postJson("/api/recommendations", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_RecommendationsNegativeLimit() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":-1}";
+        HttpResponse<String> response = postJson("/api/recommendations", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_RecommendationsZeroLimit() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":0}";
+        HttpResponse<String> response = postJson("/api/recommendations", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_RecommendationsOverflowLimit() throws Exception {
+        // Number mutation: replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":2147483647}";
+        HttpResponse<String> response = postJson("/api/recommendations", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsNullProductId() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsEmptyProductId() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"productId\":\"\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsNegativeLimit() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":-1,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsZeroLimit() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":0,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsOverflowLimit() throws Exception {
+        // Number mutation: replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":2147483647,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsNegativeOffset() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":5,\"offset\":-1}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsOverflowOffset() throws Exception {
+        // Number mutation: replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":5,\"offset\":2147483647}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsNullSort() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsEmptySort() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":5,\"offset\":0,\"sort\":\"\"}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ReviewsInvalidSort() throws Exception {
+        // Structural mutation: send invalid string where valid is expected
+        String body = "{\"productId\":\"OLJCESPC7Z\",\"limit\":5,\"offset\":0,\"sort\":\"invalid\"}";
+        HttpResponse<String> response = postJson("/api/reviews", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNullQuery() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptyQuery() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"query\":\"\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNegativeLimit() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"query\":\"electronics\",\"limit\":-1,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsZeroLimit() throws Exception {
+        // Number mutation: replace by 0
+        String body = "{\"query\":\"electronics\",\"limit\":0,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsOverflowLimit() throws Exception {
+        // Number mutation: replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+        String body = "{\"query\":\"electronics\",\"limit\":2147483647,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNegativeOffset() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":-1}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsOverflowOffset() throws Exception {
+        // Number mutation: replace by the maximum number valid for the type (e.g., Integer.MAX_VALUE)
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":2147483647}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNullSort() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptySort() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"sort\":\"\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidSort() throws Exception {
+        // Structural mutation: send invalid string where valid is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"sort\":\"invalid\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNullFilter() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptyFilter() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"filter\":\"\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidFilter() throws Exception {
+        // Structural mutation: send invalid string where valid is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"filter\":\"invalid\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNullRange() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptyRange() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"range\":\"\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidRange() throws Exception {
+        // Structural mutation: send invalid string where valid is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"range\":\"invalid\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNegativeRangeMin() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"range\":{\"min\":-1,\"max\":100}}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNegativeRangeMax() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"range\":{\"min\":10,\"max\":-1}}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidRangeMinMax() throws Exception {
+        // Number mutation: replace by invalid range
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"range\":{\"min\":100,\"max\":10}}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNullCategory() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptyCategory() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"category\":\"\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidCategory() throws Exception {
+        // Structural mutation: send invalid string where valid is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"category\":\"invalid\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNullBrand() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptyBrand() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"brand\":\"\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidBrand() throws Exception {
+        // Structural mutation: send invalid string where valid is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"brand\":\"invalid\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNullPrice() throws Exception {
+        // Structural mutation: omit required field entirely from JSON body
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsEmptyPrice() throws Exception {
+        // Structural mutation: send empty string where non-empty is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"price\":\"\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidPrice() throws Exception {
+        // Structural mutation: send invalid string where valid is expected
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"price\":\"invalid\"}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNegativePriceMin() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"price\":{\"min\":-1,\"max\":100}}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsNegativePriceMax() throws Exception {
+        // Number mutation: replace by -1
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"price\":{\"min\":10,\"max\":-1}}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductsInvalidPriceMinMax() throws Exception {
+        // Number mutation: replace by invalid range
+        String body = "{\"query\":\"electronics\",\"limit\":5,\"offset\":0,\"price\":{\"min\":100,\"max\":10}}";
+        HttpResponse<String> response = postJson("/api/products", body);
+        assertNoServerError(response);
+    }
+
+    private void assertNoServerError(HttpResponse<String> response) {
+        assertEquals(200, response.statusCode());
+        assertFalse(response.body().contains("Internal Server Error"));
+    }
+}
+```
+
+### Explanation:
+- **Setup**: The `setUp` method initializes a client for making HTTP requests.
+- **Test Cases**: Each test case sends a POST request with various JSON payloads to the API endpoints and checks if the server responds without errors.
+- **Assertions**: The `assertNoServerError` method ensures that the response status code is 200 and the response body does not contain "Internal Server Error".
+
+### Usage:
+- Replace `YOUR_API_ENDPOINT` with the actual base URL of your API.
+- Add more test cases as needed to cover additional scenarios or endpoints.
+
+This approach helps in identifying potential issues with how the server handles different types of requests, ensuring robustness and reliability.
+

@@ -1,0 +1,142 @@
+Thinking...
+Okay, I need to create a JUnit 5 test class for the OpenTelemetry Astronomy Shop's robustness testing. Let me start by understanding the requirements.
+
+The test class should be named OTelShop_ModelC_GuidedFewShot_RobustnessTest and be in the package com.example. Each test method must start with test_R1_, throw Exception, and use get, postJson, or delete with mutated inputs, then call assertNoServerError.
+
+The goal is to cover as many endpoints and mutation types as possible without repeating the same mutation on the same parameter. Let me list the endpoints and think about possible mutations for each.
+
+First, the /api/products endpoint. The GET request can have mutations on the path parameter productId. For example, replacing it with an empty string, null, or non-printable characters. But the example already has test_R1_ProductEmptyId, so I need different ones. Maybe test_R1_ProductNonPrintableId.
+
+Next, /api/products/{productId} with a known valid ID "OLJCESPC7Z". Mutations could be replacing with empty string, null, or invalid characters. But the example already covered empty string. Maybe test_R1_ProductInvalidIdNonPrintable.
+
+For /api/cart?sessionId=<string>, the GET method. The example had test_R1_CartMissingSessionId. Another mutation could be replacing the session ID with a very long string to test overflow.
+
+The POST /api/cart endpoint. The body has userId and item with productId and quantity. Possible mutations: userId as empty string, item as null, quantity as 0, negative numbers, etc. The example had test_R1_CartAddEmptyProductId and test_R1_CartAddFieldAbsentItem. So maybe test_R1_CartAddQuantityZero or test_R1_CartAddUserIdNull.
+
+For DELETE /api/cart?sessionId=<string>, similar to the GET. Maybe test_R1_CartDeleteEmptySessionId or test_R1_CartDeleteSessionIdOverflow.
+
+POST /api/checkout requires a lot of parameters. Maybe test_R1_CheckoutMissingUserId, or test_R1_CheckoutEmailEmptyString.
+
+POST /api/currency: the from object has units and nanos. The example had test_R1_CurrencyNegativeUnits. Maybe test_R1_CurrencyNanosOverflow or test_R1_CurrencyFromNull.
+
+POST /api/shipping: address and items. Maybe test_R1_ShippingAddressCountryEmpty or test_R1_ShippingItemsWithInvalidProductId.
+
+GET /api/recommendations has productIds, sessionId, currencyCode. Maybe test_R1_RecommendationsProductIdsEmpty or test_R1_RecommendationsCurrencyCodeNull.
+
+GET /api/ads?contextKeys=<string>: test_R1_AdsContextKeysNonPrintable.
+
+I need to ensure each test applies exactly one mutation rule. Let me list possible tests:
+
+1. /api/products/{productId} with non-printable characters.
+2. /api/cart?sessionId= with very long session ID.
+3. POST /api/cart with quantity as 0.
+4. POST /api/cart with item as null.
+5. DELETE /api/cart with empty session ID.
+6. POST /api/checkout with missing userId.
+7. POST /api/checkout with email as empty string.
+8. POST /api/currency with from as null.
+9. POST /api/shipping with address country empty.
+10. GET /api/recommendations with productIds as empty.
+11. GET /api/ads with contextKeys as non-printable.
+
+Wait, but the example already had test_R1_CartAddNullItem. So maybe test_R1_CartAddItemNull is already covered. Need to avoid repetition.
+
+Let me structure each test with unique parameters and mutations. For example:
+
+- For /api/products, test_R1_ProductIdNull (replace by null).
+- For /api/products/{productId}, test_R1_ProductIdNonPrintable.
+- For /api/cart GET, test_R1_CartSessionIdOverflow (very long string).
+- For /api/cart POST, test_R1_CartQuantityZero.
+- For DELETE /api/cart, test_R1_CartDeleteSessionIdEmpty.
+- For /api/checkout, test_R1_CheckoutUserIdMissing.
+- For /api/checkout, test_R1_CheckoutEmailEmpty.
+- For /api/currency, test_R1_CurrencyFromNull.
+- For /api/shipping, test_R1_ShippingAddressCountryEmpty.
+- For /api/recommendations, test_R1_RecommendationsProductIdsEmpty.
+- For /api/ads, test_R1_AdsContextKeysNonPrintable.
+
+Each of these would be separate tests. Now, I need to write the code for each, making sure to use the correct methods and parameters. Also, ensure that each test uses a different mutation type and parameter.
+
+I should check that each test is unique and covers different aspects. Let me proceed to write the code accordingly.
+...done thinking.
+
+package com.example;
+
+import org.junit.jupiter.api.Test;
+
+import java.net.http.HttpResponse;
+
+public class OTelShop_ModelC_GuidedFewShot_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_ProductIdNull() throws Exception {
+        HttpResponse<String> response = get("/api/products/null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ProductIdNonPrintable() throws Exception {
+        HttpResponse<String> response = get("/api/products/\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartSessionIdOverflow() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=" + "A".repeat(1000));
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartQuantityZero() throws Exception {
+        String body = "{\"userId\":\"user-1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        HttpResponse<String> response = postJson("/api/cart", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CartDeleteSessionIdEmpty() throws Exception {
+        HttpResponse<String> response = delete("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutUserIdMissing() throws Exception {
+        String body = "{\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"user@example.com\",\"creditCard\":{\"creditCardNumber\":\"4111111111111111\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CheckoutEmailEmpty() throws Exception {
+        String body = "{\"userId\":\"user-1\",\"userCurrency\":\"USD\",\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"email\":\"\",\"creditCard\":{\"creditCardNumber\":\"4111111111111111\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        HttpResponse<String> response = postJson("/api/checkout", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_CurrencyFromNull() throws Exception {
+        String body = "{\"from\":null,\"toCode\":\"EUR\"}";
+        HttpResponse<String> response = postJson("/api/currency", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_ShippingAddressCountryEmpty() throws Exception {
+        String body = "{\"address\":{\"streetAddress\":\"1 Main St\",\"state\":\"CA\",\"country\":\"\",\"city\":\"Springfield\",\"zipCode\":\"12345\"},\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}";
+        HttpResponse<String> response = postJson("/api/shipping", body);
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_RecommendationsProductIdsEmpty() throws Exception {
+        HttpResponse<String> response = get("/api/recommendations?productIds=&sessionId=test&currencyCode=USD");
+        assertNoServerError(response);
+    }
+
+    @Test
+    public void test_R1_AdsContextKeysNonPrintable() throws Exception {
+        HttpResponse<String> response = get("/api/ads?contextKeys=\u0000");
+        assertNoServerError(response);
+    }
+}
+

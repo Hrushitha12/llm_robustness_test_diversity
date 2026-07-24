@@ -1,0 +1,428 @@
+Thinking...
+Okay, I need to create a JUnit 5 test class for the OpenTelemetry Astronomy Shop's robustness testing. The user has given specific instructions on how to approach this. Let me break down the requirements.
+
+First, the test class must extend OTelShopBaseTest, which provides methods like get, postJson, delete, and assertNoServerError. The package is com.example, and the class name is OTelShop_ModelC_Guided_RobustnessTest. Each test method should start with test_R1_ and throw Exception. They must not use assertThrows or try-catch blocks, and only use the provided methods.
+
+The goal is to apply mutation rules to each parameter of the endpoints. The mutation rules are for string, number, and list parameters. For each endpoint, I need to identify parameters and apply the most distinct mutations.
+
+Let me list the endpoints and their parameters:
+
+1. GET /api/products – no parameters.
+2. GET /api/products/{productId} – productId is a string.
+3. GET /api/cart?sessionId=<string> – sessionId is a string.
+4. POST /api/cart – body has userId (string), item.productId (string), item.quantity (integer).
+5. DELETE /api/cart?sessionId=<string> – sessionId is a string.
+6. POST /api/checkout – userId (string), userCurrency (string), address fields (strings), email (string), creditCard fields (string, integer, integer, integer).
+7. POST /api/currency – from.currencyCode (string), from.units (integer), from.nanos (integer), toCode (string).
+8. POST /api/shipping – address fields (strings), items list (each item has productId and quantity).
+9. GET /api/recommendations – productIds (string), sessionId (string), currencyCode (string).
+10. GET /api/ads – contextKeys (string).
+
+Now, I need to pick endpoints and parameters to test. Since the user wants coverage of as many endpoints, parameters, and mutation categories as possible, I should select different endpoints and apply various mutations.
+
+Let me start with the /api/products/{productId} endpoint. The productId is a string. The valid ID is "OLJCESPC7Z". For mutations, I can test null, empty string, nonprintable characters, etc.
+
+Next, the /api/cart GET with sessionId. The sessionId is a string. Apply similar mutations.
+
+For POST /api/cart, parameters include userId (string), item.productId (string), item.quantity (integer). I can mutate each of these.
+
+The DELETE /api/cart has sessionId again. Maybe test different mutations here.
+
+For POST /api/checkout, there are multiple string and integer parameters. For example, userCurrency, address fields, credit card info. I can mutate these.
+
+The /api/currency POST has parameters like currencyCode, units, nanos, toCode. Apply mutations to these.
+
+The /api/shipping POST has address fields and items list. The items list can be mutated by adding invalid elements or empty list.
+
+The /api/recommendations GET has productIds (string), sessionId (string), currencyCode (string). Mutate these.
+
+The /api/ads GET has contextKeys (string). Mutate that.
+
+Now, for each parameter, apply the most distinct mutations. For example, for a string parameter, replace with null, empty string, nonprintable characters, etc. For integers, use min, max, overflow, etc.
+
+Each test method should be unique and start with test_R1_. Also, each test must call get, postJson, or delete with the mutated input and then assertNoServerError.
+
+I need to make sure that each test method is distinct and covers different parameters and endpoints. Let me structure the test methods accordingly.
+
+For example:
+
+- Test GET /api/products/{productId} with mutated productId (null, empty, etc.)
+- Test GET /api/cart with mutated sessionId.
+- Test POST /api/cart with mutated userId, item.productId, quantity.
+- Test DELETE /api/cart with mutated sessionId.
+- Test POST /api/checkout with mutated userCurrency, address fields, credit card fields.
+- Test POST /api/currency with mutated parameters.
+- Test POST /api/shipping with mutated address and items.
+- Test GET /api/recommendations with mutated productIds, sessionId, currencyCode.
+- Test GET /api/ads with mutated contextKeys.
+
+Each of these can be split into multiple test methods, applying different mutations.
+
+Also, for the POST /api/cart, the JSON body has nested objects. So, for example, sending a null item, or an empty item, etc. But the user said not to use assert on specific exceptions, just check that the response is not 5xx.
+
+Now, I need to write these test methods in Java, using the provided methods from OTelShopBaseTest.
+
+For example, for the GET /api/products/{productId} with mutated productId:
+
+test_R1_GetProductById_NullProductId: call get("/api/products/null") and assertNoServerError.
+
+Similarly, test_R1_GetProductById_EmptyProductId: get("/api/products/").
+
+But wait, the endpoint is /api/products/{productId}, so the path is constructed with the productId as a path parameter. So for mutations, I need to replace the productId in the path.
+
+Wait, but the user said that for the GET /api/products/{productId}, the known valid ID is "OLJCESPC7Z". So for mutations, replace the productId with mutated values.
+
+So for example, test_R1_GetProductById_NullProductId would be a problem because the path parameter can't be null. So maybe the test would be to use a null value as the path parameter, but how is that done? The get method's path is a string, so for example, if the original path is "/api/products/OLJCESPC7Z", then mutated versions would be "/api/products/null", "/api/products/", etc.
+
+So that's how the test would be structured.
+
+Similarly, for POST /api/cart, the body is a JSON with userId, item.productId, quantity. So for each parameter, I need to mutate them in the JSON body.
+
+For example, test_R1_PostCart_UserIdNull would have a JSON body where userId is null.
+
+But the postJson method takes a JSON string. So I need to construct the JSON with the mutated parameters.
+
+So, for each test, I need to generate the appropriate JSON with the mutated parameter.
+
+This requires creating JSON strings with the mutated values. For example, for userId being null: {"userId":null,"item":{"productId":"OLJCESPC7Z","quantity":1}}.
+
+Similarly, for item.productId being empty string: {"userId":"test","item":{"productId":"","quantity":1}}.
+
+For quantity being Integer.MIN_VALUE: {"userId":"test","item":{"productId":"OLJCESPC7Z","quantity":-2147483648}}.
+
+So, each test method will have to generate the appropriate JSON string with the mutated parameter.
+
+Now, considering the number of test methods, the user wants as many different endpoints, parameters, and mutation categories as possible. So I need to cover various endpoints and apply different mutations.
+
+Let me outline the test methods:
+
+1. test_R1_GetProductById_NullProductId
+2. test_R1_GetProductById_EmptyProductId
+3. test_R1_GetProductById_NonPrintableProductId
+4. test_R1_GetCart_NullSessionId
+5. test_R1_GetCart_EmptySessionId
+6. test_R1_GetCart_NonPrintableSessionId
+7. test_R1_PostCart_UserIdNull
+8. test_R1_PostCart_UserIdEmpty
+9. test_R1_PostCart_ItemProductIdNull
+10. test_R1_PostCart_ItemProductIdEmpty
+11. test_R1_PostCart_ItemQuantityMin
+12. test_R1_PostCart_ItemQuantityMax
+13. test_R1_DeleteCart_NullSessionId
+14. test_R1_DeleteCart_EmptySessionId
+15. test_R1_DeleteCart_NonPrintableSessionId
+16. test_R1_PostCheckout_UserCurrencyNull
+17. test_R1_PostCheckout_UserCurrencyEmpty
+18. test_R1_PostCheckout_AddressStreetAddressNull
+19. test_R1_PostCheckout_AddressStreetAddressEmpty
+20. test_R1_PostCheckout_CreditCardNumberNull
+21. test_R1_PostCheckout_CreditCardCvvMin
+22. test_R1_PostCheckout_CreditCardCvvMax
+23. test_R1_PostCurrency_FromCurrencyCodeNull
+24. test_R1_PostCurrency_FromUnitsMin
+25. test_R1_PostCurrency_FromUnitsMax
+26. test_R1_PostShipping_AddressCountryNull
+27. test_R1_PostShipping_ItemsEmptyList
+28. test_R1_GetRecommendations_ProductIdsNull
+29. test_R1_GetRecommendations_SessionIdEmpty
+30. test_R1_GetAds_ContextKeysNonPrintable
+
+That's 30 test methods. But maybe some can be combined or optimized. However, the user wants as many as possible.
+
+Now, I need to implement each of these in Java, using the provided methods.
+
+For example, test_R1_GetProductById_NullProductId would be:
+
+@Test
+void test_R1_GetProductById_NullProductId() throws Exception {
+    HttpResponse<String> response = get("/api/products/null");
+    assertNoServerError(response);
+}
+
+Similarly for others.
+
+For POST methods, the JSON body is constructed with the mutated parameters. For example, for test_R1_PostCart_UserIdNull:
+
+String jsonBody = "{\"userId\":null,\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+HttpResponse<String> response = postJson("/api/cart", jsonBody);
+assertNoServerError(response);
+
+But I need to make sure that the JSON is properly escaped. However, in Java, when using String literals, the backslashes are escaped, so in the code, it would be written as "{\"userId\":null,...}".
+
+But in Java, the string would be written as "{\"userId\":null, ...}".
+
+Now, for each parameter, I need to generate the appropriate JSON. For example, for the item.productId being empty string:
+
+"{\"userId\":\"test\",\"item\":{\"productId\":\"\",\"quantity\":1}}"
+
+For quantity being Integer.MIN_VALUE:
+
+"{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-2147483648}}"
+
+But I need to make sure that the JSON is valid. Also, for other parameters, like credit card CVV being Integer.MIN_VALUE or MAX.
+
+For the shipping endpoint, items list can be mutated. For example, an empty list:
+
+"{\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"items\":[]}"
+
+Or a list with invalid items (maybe productId is null or empty).
+
+For the recommendations endpoint, productIds is a string with comma-separated values. So for productIds being null, the query parameter would be something like "?productIds=null".
+
+Wait, the GET /api/recommendations has parameters productIds, sessionId, currencyCode. These are passed as query strings. So for example, productIds is a string that's a comma-separated list of product IDs. So for mutations, replace productIds with null, empty, etc. So the URL would be "/api/recommendations?productIds=null&sessionId=test&currencyCode=USD".
+
+But the user says that for string parameters, replace by null, empty, etc. So for productIds, the query parameter would be "null", which is a string. However, in the actual request, the parameter is a string, so passing "null" as the value is a string, not the actual null value. Wait, but how do you pass a null value as a query parameter? In HTTP, query parameters can't be null. They are either present or not. But according to the mutation rules, for a string parameter, replace by null. So perhaps in the test, we can pass a query parameter with the value "null" as a string, which represents the null mutation.
+
+But in reality, the system may not handle that correctly. However, the test is to apply the mutation as per the rules, even if the actual HTTP query can't represent null. So for example, for productIds being null, the query parameter would be "productIds=null".
+
+Similarly for other string parameters.
+
+So, for test_R1_GetRecommendations_ProductIdsNull, the URL would be "/api/recommendations?productIds=null&sessionId=test&currencyCode=USD".
+
+But the user may have intended that the parameter is replaced by a null value, which in HTTP terms is not possible. However, the mutation rule says to replace by null, so the test would pass "null" as the value.
+
+This is a bit of a problem, but according to the instructions, we need to apply the mutation rules as given, even if the HTTP representation is not perfect.
+
+Now, for each test method, I need to generate the appropriate URL or JSON body.
+
+Now, putting this all together into code.
+
+I need to make sure that all the test methods are written with the correct parameters and JSON bodies.
+
+Also, for the POST /api/checkout, the JSON body is complex, with address and credit card fields. For example, test_R1_PostCheckout_AddressStreetAddressNull would have the address.streetAddress as null.
+
+So the JSON would be:
+
+{
+  "userId": "test",
+  "item": {
+    "productId": "OLJCESPC7Z",
+    "quantity": 1
+  },
+  "address": {
+    "streetAddress": null,
+    "state": "CA",
+    "country": "US",
+    "city": "San Francisco",
+    "zipCode": "94105"
+  },
+  "creditCard": {
+    "number": "4111111111111111",
+    "cvv": 123,
+    "expiration": "12/25"
+  }
+}
+
+But the actual JSON may vary depending on the exact structure. However, the user hasn't provided the exact structure, but the initial example given is:
+
+{"userId":"test","item":{"productId":"OLJCESPC7Z","quantity":1}}.
+
+Assuming that the POST /api/checkout has a similar structure but with more fields.
+
+But since the exact structure isn't provided, I'll have to make assumptions based on the given example.
+
+In any case, the code will need to generate the appropriate JSON with the mutated parameter.
+
+Now, considering all that, the Java code for the test methods would be as follows.
+...done thinking.
+
+```java
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ApiTest {
+
+    @Test
+    void test_R1_GetProductById_NullProductId() throws Exception {
+        HttpResponse<String> response = get("/api/products/null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductById_EmptyProductId() throws Exception {
+        HttpResponse<String>响应 = get("/api/products/");
+        assertNoServerError(响应);
+    }
+
+    @Test
+    void test_R1_GetProductById_NonPrintableProductId() throws Exception {
+        HttpResponse<String> response = get("/api/products/\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCart_NullSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCart_EmptySessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCart_NonPrintableSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCart_UserIdNull() throws Exception {
+        String jsonBody = "{\"userId\":null,\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCart_UserIdEmpty() throws Exception {
+        String jsonBody = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCart_ItemProductIdNull() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":null,\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCart_ItemProductIdEmpty() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"\",\"quantity\":1}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCart_ItemQuantityMin() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-2147483648}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCart_ItemQuantityMax() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":2147483647}}";
+        HttpResponse<String> response = postJson("/api/cart", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_DeleteCart_NullSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=null");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_DeleteCart_EmptySessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_DeleteCart_NonPrintableSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_UserCurrencyNull() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":123,\"expiration\":\"12/25\"},\"currency\":null}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_UserCurrencyEmpty() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":123,\"expiration\":\"12/25\"},\"currency\":\"\"}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_AddressStreetAddressNull() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":null,\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":123,\"expiration\":\"12/25\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_AddressStreetAddressEmpty() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":123,\"expiration\":\"12/25\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_CreditCardNumberNull() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":null,\"cvv\":123,\"expiration\":\"12/25\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_CreditCardCvvMin() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":-123,\"expiration\":\"12/25\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_CreditCardCvvMax() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":999,\"expiration\":\"12/25\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCurrency_ExchangeRateMin() throws Exception {
+        String jsonBody = "{\"fromCurrency\":\"USD\",\"toCurrency\":\"EUR\",\"amount\":0.01}";
+        HttpResponse<String> response = postJson("/api/currency/exchange", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCurrency_ExchangeRateMax() throws Exception {
+        String jsonBody = "{\"fromCurrency\":\"USD\",\"toCurrency\":\"EUR\",\"amount\":1000000.00}";
+        HttpResponse<String> response = postJson("/api/currency/exchange", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetProductById_NonPrintableProductId() throws Exception {
+        HttpResponse<String> response = get("/api/products/\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GetCart_NonPrintableSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_DeleteCart_NonPrintableSessionId() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=\u0000");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_AddressCountryEmpty() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":123,\"expiration\":\"12/25\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_PostCheckout_CreditCardExpirationEmpty() throws Exception {
+        String jsonBody = "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1},\"address\":{\"streetAddress\":\"123 Main\",\"state\":\"CA\",\"country\":\"US\",\"city\":\"San Francisco\",\"zipCode\":\"94105\"},\"creditCard\":{\"number\":\"4111111111111111\",\"cvv\":123,\"expiration\":\"\"}}";
+        HttpResponse<String> response = postJson("/api/checkout", jsonBody);
+        assertNoServerError(response);
+    }
+}
+```
+

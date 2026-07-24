@@ -1,0 +1,124 @@
+```java
+package com.example;
+
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+public class OTelShop_ModelD_CoT_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    public void test_R1_GetNonExistentProductId() throws Exception {
+        assertNoServerError(get("/api/products/INVALID_ID"));
+    }
+
+    @Test
+    public void test_R1_GetNumericStringAsProductId() throws Exception {
+        assertNoServerError(get("/api/products/12345"));
+    }
+
+    @Test
+    public void test_R1_GetEmptyPathSegmentForProduct() throws Exception {
+        assertNoServerError(get("/api/products/"));
+    }
+
+    @Test
+    public void test_R1_GetWhitespaceAsProductId() throws Exception {
+        assertNoServerError(get("/api/products/   "));
+    }
+
+    @Test
+    public void test_R1_GetVeryLongProductId() throws Exception {
+        StringBuilder longId = new StringBuilder();
+        for (int i = 0; i < 500; i++) longId.append("A");
+        assertNoServerError(get("/api/products/" + longId.toString()));
+    }
+
+    @Test
+    public void test_R1_GetCartWithEmptySessionId() throws Exception {
+        assertNoServerError(get("/api/cart?sessionId="));
+    }
+
+    @Test
+    public void test_R1_GetCartWithoutSessionId() throws Exception {
+        assertNoServerError(get("/api/cart"));
+    }
+
+    @Test
+    public void test_R1_GetCartWithVeryLongSessionId() throws Exception {
+        StringBuilder longId = new StringBuilder();
+        for (int i = 0; i < 500; i++) longId.append("A");
+        assertNoServerError(get("/api/cart?sessionId=" + longId.toString()));
+    }
+
+    @Test
+    public void test_R1_DeleteCartWithEmptySessionId() throws Exception {
+        assertNoServerError(delete("/api/cart?sessionId="));
+    }
+
+    @Test
+    public void test_R1_DeleteCartWithoutSessionId() throws Exception {
+        assertNoServerError(delete("/api/cart"));
+    }
+
+    @Test
+    public void test_R1_PostCartItemWithEmptyUserId() throws Exception {
+        String body = "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        assertNoServerError(postJson("/api/cart", body));
+    }
+
+    @Test
+    public void test_R1_PostCartItemWithNullItem() throws Exception {
+        String body = "{\"userId\":\"user1\",\"item\":null}";
+        assertNoServerError(postJson("/api/cart", body));
+    }
+
+    @Test
+    public void test_R1_PostCartItemWithoutUserIdField() throws Exception {
+        String body = "{\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}";
+        assertNoServerError(postJson("/api/cart", body));
+    }
+
+    @Test
+    public void test_R1_PostCartItemWithQuantityZero() throws Exception {
+        String body = "{\"userId\":\"user1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}";
+        assertNoServerError(postJson("/api/cart", body));
+    }
+
+    @Test
+    public void test_R1_PostCartItemWithNegativeQuantity() throws Exception {
+        String body = "{\"userId\":\"user1\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}";
+        assertNoServerError(postJson("/api/cart", body));
+    }
+
+    @Test
+    public void test_R1_CheckoutWithEmptyEmail() throws Exception {
+        String body = "{\"userId\":\"user1\",\"userCurrency\":\"USD\","
+                + "\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94000\"},"
+                + "\"email\":\"\","
+                + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        assertNoServerError(postJson("/api/checkout", body));
+    }
+
+    @Test
+    public void test_R1_CheckoutWithInvalidEmailFormat() throws Exception {
+        String body = "{\"userId\":\"user1\",\"userCurrency\":\"USD\","
+                + "\"address\":{\"streetAddress\":\"123 Main St\",\"state\":\"CA\",\"country\":\"USA\",\"city\":\"San Francisco\",\"zipCode\":\"94000\"},"
+                + "\"email\":\"invalid-email\","
+                + "\"creditCard\":{\"creditCardNumber\":\"1234567890123456\",\"creditCardCvv\":123,\"creditCardExpirationYear\":2025,\"creditCardExpirationMonth\":12}}";
+        assertNoServerError(postJson("/api/checkout", body));
+    }
+
+    @Test
+    public void test_R1_ShippingWithEmptyAddressFields() throws Exception {
+        String body = "{\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},"
+                + "\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}";
+        assertNoServerError(postJson("/api/shipping", body));
+    }
+
+    @Test
+    public void test_R1_RecommendationsWithInvalidProductId() throws Exception {
+        assertNoServerError(get("/api/recommendations?productIds=INVALID_ID&sessionId=session1&currencyCode=USD"));
+    }
+}
+```
+

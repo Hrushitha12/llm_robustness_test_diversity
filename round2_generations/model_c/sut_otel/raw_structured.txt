@@ -1,0 +1,326 @@
+Thinking...
+Okay, I need to create a JUnit 5 test class for the OpenTelemetry Astronomy Shop's robustness tests. The user provided a table of test cases, each with an endpoint, a scenario, and the input to use. My task is to write a test method for each row in that table.
+
+First, I'll start by setting up the class structure. The class should be in the package com.example and named OTelShop_ModelC_Structured_RobustnessTest. It must extend OTelShopBaseTest, which provides the necessary methods like get, postJson, delete, and assertNoServerError.
+
+Each test method needs to be unique and start with test_R1_. The method signatures must include throws Exception. Also, I shouldn't use assertThrows or any try-catch blocks. The main thing is to call the appropriate HTTP method with the given input and then assert that there's no server error (status code less than 500).
+
+Let me go through each row of the table one by one.
+
+First row: GET /api/products/{id} with non-existent product ID. The path is /api/products/DOESNOTEXIST999. So the test method will call get on that path and then assertNoServerError.
+
+Second row: GET /api/products/{id} with empty string in path. The path is /api/products/. So another get call with that path.
+
+Third row: numeric ID. Path is /api/products/12345. Again, get.
+
+Fourth row: extremely long ID (1000 chars). I need to generate a string of 1000 characters. Maybe using a loop or a string repetition. But for the test, just create a string with 1000 'a's or something. Then use that in the path.
+
+Next, GET /api/cart with empty sessionId. The path is /api/cart?sessionId=, so call get with that.
+
+Then, DELETE /api/cart with missing sessionId. The path is /api/cart, so delete with that path.
+
+For the POST /api/cart tests:
+
+First, userId is empty. The JSON body is {"userId":"","item":{"productId":"OLJCESPC7Z","quantity":1}}. So postJson with that body.
+
+Next, productId is empty. Body has "productId":"".
+
+Then, quantity is zero. Body has "quantity":0.
+
+Then, quantity is negative. "quantity":-1.
+
+Then, item is null. Body has "item":null.
+
+For POST /api/checkout, empty userId. The body has "userId":"".
+
+Invalid currency code: userCurrency is "ZZZ".
+
+Credit card number empty: "creditCardNumber":"".
+
+Expiration year in the past: year 2000, month 1.
+
+For POST /api/currency, unknown fromCode: "ZZZ".
+
+Unknown toCode: "ZZZ".
+
+Units negative: -1.
+
+For POST /api/shipping, all address fields empty. So the address fields are all empty strings.
+
+For GET /api/recommendations with non-existent productIds: productIds=FAKE999.
+
+Now, I need to code each of these as separate test methods. Each method will call the appropriate get, postJson, or delete method with the specified input, then call assertNoServerError on the response.
+
+I need to make sure that each test method is correctly named, uses the right HTTP method, and the input as specified. Also, for the long ID, I need to generate a 1000-character string. Maybe using a string like "a".repeat(1000) in Java 17.
+
+Also, for the shipping test, the address fields are all empty. So the JSON body for the shipping POST would have all address fields as empty strings.
+
+I should check that all the test methods are covered, and each one is unique. Let me count the rows in the table to ensure I don't miss any. The table has 17 rows. Let me check:
+
+1. GET /products/{id} - non-existent
+2. GET /products/{id} - empty path
+3. GET /products/{id} - numeric ID
+4. GET /products/{id} - long ID
+5. GET /cart - empty sessionId
+6. GET /cart - missing sessionId
+7. DELETE /cart - empty sessionId
+8. POST /cart - userId empty
+9. POST /cart - productId empty
+10. POST /cart - quantity zero
+11. POST /cart - quantity negative
+12. POST /cart - item null
+13. POST /checkout - empty userId
+14. POST /checkout - invalid currency
+15. POST /checkout - credit card empty
+16. POST /checkout - expiration past
+17. POST /currency - fromCode unknown
+18. POST /currency - toCode unknown
+19. POST /currency - units negative
+20. POST /shipping - address empty
+21. GET /recommendations - productIds fake
+
+Wait, the original table has 21 rows? Let me check again. The user's table has:
+
+The first table has 21 rows? Let me recount:
+
+Looking at the table:
+
+- GET /api/products/{id} has 4 rows (non-existent, empty, numeric, long)
+- GET /api/cart has 2 (empty sessionId, missing)
+- DELETE /api/cart has 1 (empty)
+- POST /api/cart has 6 (userId empty, productId empty, quantity zero, negative, item null)
+- POST /api/checkout has 4 (empty userId, invalid currency, credit card empty, expiration)
+- POST /api/currency has 3 (fromCode, toCode, units)
+- POST /api/shipping has 1 (address empty)
+- GET /api/recommendations has 1 (productIds fake)
+
+So total rows: 4+2+1+6+4+3+1+1 = 22? Let me check again.
+
+Wait, the user's table has:
+
+Original table rows:
+
+1. GET /api/products/{id} | non-existent product ID | /api/products/DOESNOTEXIST999
+2. GET /api/products/{id} | empty string segment in path | /api/products/
+3. GET /api/products/{id} | numeric string as ID | /api/products/12345
+4. GET /api/products/{id} | extremely long ID | /api/products/<1000-char string>
+5. GET /api/cart | empty sessionId | /api/cart?sessionId=
+6. GET /api/cart | sessionId missing | /api/cart
+7. DELETE /api/cart | empty sessionId | /api/cart?sessionId=
+8. POST /api/cart | userId empty | ...
+9. POST /api/cart | productId empty | ...
+10. POST /api/cart | quantity zero | ...
+11. POST /api/cart | quantity negative | ...
+12. POST /api/cart | item null | ...
+13. POST /api/checkout | empty userId | ...
+14. POST /api/checkout | invalid currency | ...
+15. POST /api/checkout | credit card empty | ...
+16. POST /api/checkout | expiration past | ...
+17. POST /api/currency | fromCode unknown | ...
+18. POST /api/currency | toCode unknown | ...
+19. POST /api/currency | units negative | ...
+20. POST /api/shipping | address empty | ...
+21. GET /api/recommendations | productIds fake | ...
+
+Yes, that's 21 rows. So the test class must have 21 test methods.
+
+Now, for each of these, I need to write the corresponding test method.
+
+For the long ID, I can generate a string of 1000 'a's. In Java, using "a".repeat(1000) would do that.
+
+For the shipping test, the body would be:
+
+{
+  "address": {
+    "streetAddress": "",
+    "state": "",
+    "country": "",
+    "city": "",
+    "zipCode": ""
+  },
+  "items": [
+    {
+      "productId": "OLJCESPC7Z",
+      "quantity": 1
+    }
+  ]
+}
+
+But the user's scenario says "all address fields empty strings". So the items may not be relevant, but the test case is about the address. However, the POST /shipping requires the items array. So the test must include that. Maybe the items can be arbitrary, as long as the address is empty.
+
+For the recommendations test, the URL is /api/recommendations?productIds=FAKE999&sessionId=s1&currencyCode=USD. So the get method is called with that path.
+
+Each test method will call the appropriate method (get, postJson, delete) with the specified input, then assertNoServerError on the response.
+
+Now, writing the code:
+
+The class will have 21 test methods, each with unique names starting with test_R1_.
+
+For example, the first test method would be:
+
+@Test
+void test_R1_GET_products_nonexistent() throws Exception {
+    HttpResponse<String> response = get("/api/products/DOESNOTEXIST999");
+    assertNoServerError(response);
+}
+
+Similarly for others.
+
+Now, I need to make sure that each test is correctly implemented. For the POST /api/cart with item null, the JSON body is {"userId":"test-user","item":null}.
+
+For the POST /api/checkout with empty userId, the body is {"userId":"","userCurrency":"USD", ...} (assuming other fields are filled with valid data, but the user's scenario only specifies the userId field being empty. However, the user's table says "empty userId" for the checkout body. But the actual JSON body needs to be valid except for that field. However, the test is about the robustness, not about the validity of other fields. So perhaps the other fields can be filled with dummy data.
+
+But the user's instruction says that the input used is as specified. For example, for the checkout with empty userId, the body is as per the scenario. However, the user's table doesn't specify the entire body, only the field that's being tested. So perhaps the other fields are filled with dummy data. But the user's table's "Input used" column may not have the full body. Wait, looking back:
+
+In the table, for the POST /api/checkout scenarios, the "Input used" column for empty userId is "checkout body with userId: """, which implies that the rest of the body is valid. However, the test case may not need to have valid data for other fields, as the test is about the robustness of the system when a specific field is invalid. But the user's instruction says to use the input as specified. However, the input may not be fully specified, so I need to make assumptions.
+
+But the user's instruction says that the test must use the input as specified in the "Input used" column. For example, for the POST /api/checkout with empty userId, the input used is a checkout body with userId: "". However, the rest of the body may not be specified. But in reality, the system may require other fields. However, the robustness test is about the system handling the input gracefully, regardless of other fields. So perhaps the other fields can be filled with dummy data, as long as the specified field is invalid.
+
+But since the user hasn't provided the full body, perhaps the test cases are designed to have minimal valid data for other fields. However, the user's instruction says that the input used is as per the table, but the table may not have the full body. For example, for the POST /api/cart with userId empty, the input is {"userId":"","item":{"productId":"OLJCESPC7Z","quantity":1}}. So the rest of the body is valid except for the userId being empty. Similarly, for other cases.
+
+So, in the test cases, the JSON bodies for the POST requests are constructed with the specified fields as per the scenario, and other fields filled with valid data where necessary.
+
+Therefore, for each test case, the JSON body is constructed accordingly.
+
+Now, putting all together into code.
+
+The class will have 21 test methods. Each method will be annotated with @Test, have a unique name starting with test_R1_, and throw Exception. Each method will call get(), postJson(), or delete() with the specified input, then call assertNoServerError().
+
+Now, writing the code step by step.
+...done thinking.
+
+package com.example;
+
+import org.junit.jupiter.api.Test;
+
+import java.net.http.HttpResponse;
+
+public class OTelShop_ModelC_Structured_RobustnessTest extends OTelShopBaseTest {
+
+    @Test
+    void test_R1_GET_products_nonexistent() throws Exception {
+        HttpResponse<String> response = get("/api/products/DOESNOTEXIST999");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GET_products_empty_path() throws Exception {
+        HttpResponse<String> response = get("/api/products/");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GET_products_numeric_id() throws Exception {
+        HttpResponse<String> response = get("/api/products/12345");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GET_products_long_id() throws Exception {
+        HttpResponse<String> response = get("/api/products/" + "a".repeat(1000));
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GET_cart_empty_session_id() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GET_cart_missing_session_id() throws Exception {
+        HttpResponse<String> response = get("/api/cart");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_DELETE_cart_empty_session_id() throws Exception {
+        HttpResponse<String> response = get("/api/cart?sessionId=");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_cart_empty_user_id() throws Exception {
+        HttpResponse<String> response = postJson("/api/cart", "{\"userId\":\"\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_cart_empty_product_id() throws Exception {
+        HttpResponse<String> response = postJson("/api/cart", "{\"userId\":\"test\",\"item\":{\"productId\":\"\",\"quantity\":1}}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_cart_quantity_zero() throws Exception {
+        HttpResponse<String> response = postJson("/api/cart", "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":0}}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_cart_quantity_negative() throws Exception {
+        HttpResponse<String> response = postJson("/api/cart", "{\"userId\":\"test\",\"item\":{\"productId\":\"OLJCESPC7Z\",\"quantity\":-1}}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_cart_item_null() throws Exception {
+        HttpResponse<String> response = postJson("/api/cart", "{\"userId\":\"test\",\"item\":null}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_checkout_empty_user_id() throws Exception {
+        HttpResponse<String> response = postJson("/api/checkout", "{\"userId\":\"\",\"userCurrency\":\"USD\",\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_checkout_invalid_currency() throws Exception {
+        HttpResponse<String> response = postJson("/api/checkout", "{\"userId\":\"test\",\"userCurrency\":\"INVALID\",\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_checkout_credit_card_empty() throws Exception {
+        HttpResponse<String> response = postJson("/api/checkout", "{\"userId\":\"test\",\"userCurrency\":\"USD\",\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}],\"creditCard\":\"\"}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_checkout_expiration_past() throws Exception {
+        HttpResponse<String> response = postJson("/api/checkout", "{\"userId\":\"test\",\"userCurrency\":\"USD\",\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}],\"creditCard\":\"1234 5678 9012 3456\",\"expiration\":\"2020-01\"}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_currency_fromcode_unknown() throws Exception {
+        HttpResponse<String> response = postJson("/api/currency", "{\"fromCode\":\"XYZ\",\"toCode\":\"USD\",\"amount\":100}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_currency_tocode_unknown() throws Exception {
+        HttpResponse<String> response = postJson("/api/currency", "{\"fromCode\":\"USD\",\"toCode\":\"XYZ\",\"amount\":100}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_currency_units_negative() throws Exception {
+        HttpResponse<String> response = postJson("/api/currency", "{\"fromCode\":\"USD\",\"toCode\":\"EUR\",\"amount\":-100}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_POST_shipping_empty_address() throws Exception {
+        HttpResponse<String> response = postJson("/api/shipping", "{\"address\":{\"streetAddress\":\"\",\"state\":\"\",\"country\":\"\",\"city\":\"\",\"zipCode\":\"\"},\"items\":[{\"productId\":\"OLJCESPC7Z\",\"quantity\":1}]}");
+        assertNoServerError(response);
+    }
+
+    @Test
+    void test_R1_GET_recommendations_fake_productids() throws Exception {
+        HttpResponse<String> response = get("/api/recommendations?productIds=FAKE999&sessionId=s1&currencyCode=USD");
+        assertNoServerError(response);
+    }
+}
+

@@ -1,0 +1,404 @@
+Thinking...
+Okay, let's see. I need to write JUnit 5 tests for the OpenTelemetry Astronomy Shop's robustness. The main goal is to ensure that all HTTP responses are less than 500, meaning no server errors. The test class should extend OTelShopBaseTest, which provides methods like get, postJson, delete, and assertNoServerError.
+
+First, I need to go through each step of the reasoning process and pick out the most distinct violations for each endpoint.
+
+Starting with Step 1: Product catalog violations. The productId is a string. So possible violations could be non-existent ID, numeric string, empty path, whitespace-only, very long string. Maybe test a non-existent ID, a numeric ID, empty path, and a long string.
+
+Step 2: Cart GET and DELETE with sessionId. For GET, maybe test empty sessionId, missing key, very long sessionId. Same for DELETE. But since the question says to test GET and DELETE separately, maybe each has their own tests. But maybe the GET and DELETE for sessionId violations are similar, but need to check if the system handles them differently.
+
+Step 3: Cart POST body violations. The body has userId, item with productId and quantity. So violations could be userId empty, item missing, productId empty, quantity zero, negative, large, etc. Each of these is a distinct test.
+
+Step 4: Checkout POST. Here, the body is more complex. So violations like empty userId, invalid currency code, invalid email, invalid credit card details, past expiration date, empty address, missing address, no items in cart.
+
+Step 5: Currency POST. Violations include unknown fromCode, unknown toCode, same code, negative units, nanos out of range, empty currencyCode.
+
+Step 6: Shipping POST. Items array empty, non-existent product ID, quantity zero, empty address, missing address, missing items field.
+
+Step 7: Recommendations and Ads GET. For recommendations, invalid productIds, unknown currency, empty sessionId. For ads, empty contextKeys, all params missing.
+
+Now, Step 8: Select 15-18 tests, distinct violations. Need to pick the most distinct ones across all endpoints. Let's think:
+
+For Product catalog: non-existent ID (like "invalid"), numeric ID (like "12345"), empty path, long string.
+
+For Cart GET: empty sessionId, missing sessionId key, long sessionId.
+
+For Cart POST: missing item, empty productId, quantity zero, negative quantity, large quantity.
+
+For Checkout: empty userId, invalid currency, empty email, invalid credit card number, past expiration, empty address, missing address, no items.
+
+For Currency: unknown fromCode, unknown toCode, same code, negative units, nanos out of range.
+
+For Shipping: empty items, non-existent product ID, empty address, missing address, missing items.
+
+For Recommendations: invalid productIds, empty sessionId, unknown currency.
+
+For Ads: empty contextKeys, all params missing.
+
+That's a lot, but need to pick 15-18. Let's count:
+
+Product: 4 tests.
+
+Cart GET: 3 tests.
+
+Cart POST: 5 tests.
+
+Checkout: 8 tests (but maybe some can be combined). Wait, the original list for checkout has 10 points, but maybe pick some of the most distinct.
+
+Currency: 5 tests.
+
+Shipping: 5 tests.
+
+Recommendations: 3 tests.
+
+Ads: 2 tests.
+
+Total could be over 20. Need to select 15-18. Let's pick the most distinct ones.
+
+Maybe for Product: non-existent ID, numeric ID, empty path, long string (4 tests).
+
+Cart GET: empty sessionId, missing key, long sessionId (3 tests).
+
+Cart POST: missing item, empty productId, quantity zero, negative quantity, large quantity (5 tests).
+
+Checkout: empty userId, invalid currency, empty email, invalid credit card, past expiration, empty address, missing address, no items (but maybe pick 4 of these).
+
+Currency: unknown fromCode, unknown toCode, same code, negative units, nanos out of range (5 tests).
+
+Shipping: empty items, non-existent product ID, empty address, missing address, missing items (5 tests).
+
+Recommendations: invalid productIds, empty sessionId, unknown currency (3 tests).
+
+Ads: empty contextKeys, all params missing (2 tests).
+
+Total would be 4+3+5+4+5+5+3+2= 31. That's way too many. Need to cut down.
+
+But the user says to select 15-18 tests. So need to pick the most distinct ones, ensuring they are structurally different.
+
+Let me think again. For each endpoint, pick the most distinct violations. For example:
+
+Product: non-existent ID, numeric ID, empty path, long string (4 tests).
+
+Cart GET: empty sessionId, missing key (since long sessionId might be similar to other tests, maybe pick two).
+
+Cart POST: missing item, empty productId, quantity zero, negative quantity (maybe 4 tests).
+
+Checkout: empty userId, invalid currency, empty email, invalid credit card (4 tests).
+
+Currency: unknown fromCode, unknown toCode, same code, negative units (4 tests).
+
+Shipping: empty items, non-existent product ID, empty address (3 tests).
+
+Recommendations: invalid productIds, unknown currency (2 tests).
+
+Ads: empty contextKeys, all params missing (2 tests).
+
+That totals 4+2+4+4+4+3+2+2= 25. Still too many. Need to reduce further.
+
+Alternatively, maybe pick the most critical ones. For example:
+
+Product: non-existent ID, numeric ID (2 tests).
+
+Cart GET: empty sessionId, missing key (2 tests).
+
+Cart POST: missing item, empty productId, quantity zero, negative quantity (4 tests).
+
+Checkout: empty userId, invalid currency, empty email (3 tests).
+
+Currency: unknown fromCode, unknown toCode, same code (3 tests).
+
+Shipping: empty items, non-existent product ID, empty address (3 tests).
+
+Recommendations: invalid productIds, unknown currency (2 tests).
+
+Ads: empty contextKeys, all params missing (2 tests).
+
+Total: 2+2+4+3+3+3+2+2= 21. Still over 18.
+
+Maybe further reduce:
+
+Product: non-existent ID (1 test).
+
+Cart GET: empty sessionId (1 test).
+
+Cart POST: missing item, empty productId, quantity zero (3 tests).
+
+Checkout: empty userId, invalid currency, empty email (3 tests).
+
+Currency: unknown fromCode, unknown toCode (2 tests).
+
+Shipping: empty items, non-existent product ID (2 tests).
+
+Recommendations: invalid productIds (1 test).
+
+Ads: empty contextKeys (1 test).
+
+Total: 1+1+3+3+2+2+1+1= 14. That's within 15-18.
+
+But maybe need to include more distinct ones. For example, include the numeric ID for product, empty path, etc.
+
+Alternatively, let's pick:
+
+Product: non-existent ID, numeric ID (2 tests).
+
+Cart GET: empty sessionId, missing key (2 tests).
+
+Cart POST: missing item, empty productId, quantity zero, negative quantity (4 tests).
+
+Checkout: empty userId, invalid currency, empty email, invalid credit card (4 tests).
+
+Currency: unknown fromCode, unknown toCode, same code (3 tests).
+
+Shipping: empty items, non-existent product ID, empty address (3 tests).
+
+Recommendations: invalid productIds, unknown currency (2 tests).
+
+Ads: empty contextKeys, all params missing (2 tests).
+
+Total: 2+2+4+4+3+3+2+2= 22. Still over.
+
+Hmm. The user says to select 15-18 tests. So perhaps pick the most distinct ones from each category.
+
+Let me try to list them:
+
+1. Product: non-existent ID (GET /api/products/{productId} with invalid ID)
+2. Product: numeric ID (GET /api/products/12345)
+3. Product: empty path (GET /api/products/)
+4. Product: long string (GET /api/products/500chars)
+5. Cart GET: empty sessionId (GET /api/cart?sessionId=)
+6. Cart GET: missing sessionId key (GET /api/cart)
+7. Cart POST: missing item (POST /api/cart with body missing item)
+8. Cart POST: empty productId (POST /api/cart with item.productId as "")
+9. Cart POST: quantity zero (POST /api/cart with quantity 0)
+10. Cart POST: negative quantity (POST /api/cart with quantity -1)
+11. Checkout: empty userId (POST /api/checkout with userId "")
+12. Checkout: invalid currency (userCurrency "ZZZ")
+13. Checkout: empty email (email "")
+14. Checkout: invalid credit card number (creditCardNumber "123")
+15. Currency: unknown fromCode ("ZZZ")
+16. Currency: unknown toCode ("ZZZ")
+17. Shipping: empty items (POST /api/shipping with empty items)
+18. Shipping: non-existent product ID (items with productId not existing)
+19. Recommendations: invalid productIds (GET /api/recommendations with productIds="invalid")
+20. Ads: empty contextKeys (GET /api/ads?contextKeys=)
+
+But that's 20 tests. Need to trim to 15-18. Let's pick the most distinct ones.
+
+Maybe remove some:
+
+- Remove product empty path and long string, keep non-existent and numeric.
+
+- Remove Cart GET missing key, keep empty sessionId.
+
+- Keep Cart POST missing item, empty productId, quantity zero, negative.
+
+- Keep Checkout: empty userId, invalid currency, empty email, invalid credit card.
+
+- Keep Currency: unknown fromCode, unknown toCode.
+
+- Keep Shipping: empty items, non-existent product ID.
+
+- Keep Recommendations: invalid productIds.
+
+- Keep Ads: empty contextKeys.
+
+That would be:
+
+1. Product: non-existent ID
+2. Product: numeric ID
+3. Cart GET: empty sessionId
+4. Cart POST: missing item
+5. Cart POST: empty productId
+6. Cart POST: quantity zero
+7. Cart POST: negative quantity
+8. Checkout: empty userId
+9. Checkout: invalid currency
+10. Checkout: empty email
+11. Checkout: invalid credit card
+12. Currency: unknown fromCode
+13. Currency: unknown toCode
+14. Shipping: empty items
+15. Shipping: non-existent product ID
+16. Recommendations: invalid productIds
+17. Ads: empty contextKeys
+
+That's 17 tests. Each is distinct. Now, need to code these tests in Java, using the methods provided by OTelShopBaseTest.
+
+Each test method must start with test_R1_, have a unique name, and throw Exception.
+
+Now, writing the Java class. Let's see:
+
+For each test:
+
+Test_R1_Product_NonExistentId: GET /api/products/OLJCESPC7Z is valid, but maybe a different ID. Wait, the known valid ID is "OLJCESPC7Z". So for non-existent, use "invalid".
+
+Test_R1_Product_NumericId: GET /api/products/12345.
+
+Test_R1_CartGet_EmptySessionId: GET /api/cart?sessionId=.
+
+Test_R1_CartPost_MissingItem: POST /api/cart with body missing "item".
+
+Test_R1_CartPost_EmptyProductId: POST /api/cart with item.productId as "".
+
+Test_R1_CartPost_QuantityZero: POST /api/cart with quantity 0.
+
+Test_R1_CartPost_NegativeQuantity: POST /api/cart with quantity -1.
+
+Test_R1_Checkout_EmptyUserId: POST /api/checkout with userId "".
+
+Test_R1_Checkout_InvalidCurrency: POST /api/checkout with userCurrency "ZZZ".
+
+Test_R1_Checkout_EmptyEmail: POST /api/checkout with email "".
+
+Test_R1_Checkout_InvalidCreditCard: POST /api/checkout with creditCardNumber "123".
+
+Test_R1_Currency_UnknownFromCode: POST /api/currency with from.currencyCode "ZZZ".
+
+Test_R1_Currency_UnknownToCode: POST /api/currency with toCode "ZZZ".
+
+Test_R1_Shipping_EmptyItems: POST /api/shipping with empty items array.
+
+Test_R1_Shipping_NonExistentProductId: POST /api/shipping with items containing a non-existent productId.
+
+Test_R1_Recommendations_InvalidProductIds: GET /api/recommendations?productIds=invalid.
+
+Test_R1_Ads_EmptyContextKeys: GET /api/ads?contextKeys=.
+
+Now, implement each of these.
+
+For example:
+
+public void test_R1_Product_NonExistentId() throws Exception {
+    String url = "/api/products/invalid";
+    // perform GET request
+    // assert response
+    assertNoError(url);
+}
+
+But the actual code would use the methods from OTelShopBaseTest, like get and post, and then assertNoError.
+
+But since the user hasn't provided the actual code structure, I'll proceed with the method names and parameters as per the problem description.
+
+Now, writing the Java code accordingly.
+...done thinking.
+
+```java
+public class ApiTests {
+
+    public void test_R1_Product_NonExistentId() throws Exception {
+        String url = "/api/products/invalid";
+        get(url);
+        assertNoError(url);
+    }
+
+    public void test_R1_Product_NumericId() throws Exception {
+        String url = "/api/products/12345";
+        get(url);
+        assertNoError(url);
+    }
+
+    public void test_R1_CartGet_EmptySessionId() throws Exception {
+        String url = "/api/cart?sessionId=";
+        get(url);
+        assertNoError(url);
+    }
+
+    public void test_R1_CartPost_MissingItem() throws Exception {
+        String body = "{ \"userId\": \"test\" }";
+        post("/api/cart", body);
+        assertNoError("/api/cart");
+    }
+
+    public void test_R1_CartPost_EmptyProductId() throws Exception {
+        String body = "{ \"userId\": \"test\", \"item\": { \"productId\": \"\", \"quantity\": 1 } }";
+        post("/api/cart", body);
+        assertNoError("/api/cart");
+    }
+
+    public void test_R1_CartPost_QuantityZero() throws Exception {
+        String body = "{ \"userId\": \"test\", \"item\": { \"productId\": \"OLJCESPC7Z\", \"quantity\": 0 } }";
+        post("/api/cart", body);
+        assertNo错误("/api/cart");
+    }
+
+    public void test_R1_CartPost_NegativeQuantity() throws Exception {
+        String body = "{ \"userId\": \"test\", \"item\": { \"productId\": \"OLJCESPC7Z\", \"quantity\": -1 } }";
+        post("/api/cart", body);
+        assertNoError("/api/cart");
+    }
+
+    public void test_R1_Checkout_EmptyUserId() throws Exception {
+        String body = "{ \"userCurrency\": \"USD\", \"email\": \"test@example.com\", \"creditCard\": { \"number\": \"4111111111111111\" } }";
+        post("/api/checkout", body);
+        assertNoError("/api/checkout");
+    }
+
+    public void test_R1_Checkout_InvalidCurrency() throws Exception {
+        String body = "{ \"userId\": \"test\", \"userCurrency\": \"ZZZ\", \"email\": \"test@example.com\", \"creditCard\": { \"number\": \"4111111111111111\" } }";
+        post("/api/checkout", body);
+        assertNoError("/api/checkout");
+    }
+
+    public void test_R1_Checkout_EmptyEmail() throws Exception {
+        String body = "{ \"userId\": \"test\", \"userCurrency\": \"USD\", \"email\": \"\", \"creditCard\": { \"number\": \"4111111111111111\" } }";
+        post("/api/checkout", body);
+        assertNoError("/api/checkout");
+    }
+
+    public void test_R1_Checkout_InvalidCreditCard() throws Exception {
+        String body = "{ \"userId\": \"test\", \"userCurrency\": \"USD\", \"email\": \"test@example.com\", \"creditCard\": { \"number\": \"123\" } }";
+        post("/api/checkout", body);
+        assertNoError("/api/checkout");
+    }
+
+    public void test_R1_Currency_UnknownFromCode() throws Exception {
+        String body = "{ \"from\": { \"currencyCode\": \"ZZZ\", \"amount\": 100 }, \"to\": \"USD\" }";
+        post("/api/currency", body);
+        assertNoError("/api/currency");
+    }
+
+    public void test_R1_Currency_UnknownToCode() throws Exception {
+        String body = "{ \"from\": { \"currencyCode\": \"USD\", \"amount\": 100 }, \"to\": \"ZZZ\" }";
+        post("/api/currency", body);
+        assertNoError("/api/currency");
+    }
+
+    public void test_R1_Shipping_EmptyItems() throws Exception {
+        String body = "{ \"items\": [] }";
+        post("/api/shipping", body);
+        assertNoError("/api/shipping");
+    }
+
+    public void test_R1_Shipping_NonExistentProductId() throws Exception {
+        String body = "{ \"items\": [ { \"productId\": \"invalid\", \"quantity\": 1 } ] }";
+        post("/api/shipping", body);
+        assertNoError("/api/shipping");
+    }
+
+    public void test_R1_Recommendations_InvalidProductIds() throws Exception {
+        String url = "/api/recommendations?productIds=invalid";
+        get(url);
+        assertNoError(url);
+    }
+
+    public void test_R1_Ads_EmptyContextKeys() throws Exception {
+        String url = "/api/ads?contextKeys=";
+        get(url);
+        assertNoError(url);
+    }
+
+    // Helper methods assumed to exist in the test framework
+    private void get(String url) throws Exception {
+        // Implementation to perform a GET request
+    }
+
+    private void post(String url, String body) throws Exception {
+        // Implementation to perform a POST request
+    }
+
+    private void assertNoError(String url) {
+        // Implementation to check for no errors in the response
+    }
+}
+```
+
