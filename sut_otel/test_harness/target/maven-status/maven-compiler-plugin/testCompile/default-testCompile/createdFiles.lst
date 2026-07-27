@@ -12,6 +12,7 @@ com\example\OTelShop_ModelD_FewShot_RobustnessTest.class
 com\example\OTelShop_ModelE_CoT_R2_RobustnessTest.class
 com\example\OTelShop_ModelD_Self_RobustnessTest.class
 com\example\OTelShop_ModelC_GuidedFewShot_RobustnessTest.class
+com\example\OTelShop_ModelE_fewshot_R2_RobustnessTest.class
 com\example\OTelShop_ModelE_Guided_RobustnessTest.class
 com\example\OTelShop_ModelE_GuidedFewShot_RobustnessTest.class
 com\example\OTelShop_ModelE_FewShot_RobustnessTest.class
